@@ -1,0 +1,5 @@
+#<module><function> <input-file> <expected return>
+d01p1 d01-example 7
+d01p1 d01 1709
+d01p2 d01-example 5
+d01p2 d01 1761

@@ -12,9 +12,12 @@ function initrepo {
 
 function check {
     echo "Run Taskfile help to see other task you can run"
-    echo "running default of precommit checks"
+    echo "Running the default precommit checks"
     mypy --strict ${REPO_ROOT}/python/src/*.py
     pytest ${REPO_ROOT}/python/src
+    pushd ${REPO_ROOT}/rust
+    cargo test
+    popd
 }
 
 function newday {
@@ -27,13 +30,22 @@ function newday {
     echo $NEW_DAY
     touch ${REPO_ROOT}/input/${NEW_DAY}
     touch ${REPO_ROOT}/input/${NEW_DAY}-example
-
-    cp ${REPO_ROOT}/python/src/template.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
+    git add ${REPO_ROOT}/input/${NEW_DAY} ${REPO_ROOT}/input/${NEW_DAY}-example
     echo "#${NEW_DAY}p1p2 ${NEW_DAY}-example (0, 0)" >> ${REPO_ROOT}/answers
     echo "#${NEW_DAY}p1p2 ${NEW_DAY} (0, 0)" >> ${REPO_ROOT}/answers
-    git add ${REPO_ROOT}/python/src/${NEW_DAY}.py ${REPO_ROOT}/input/${NEW_DAY} ${REPO_ROOT}/input/${NEW_DAY}-example
+
+    # Python
+    cp ${REPO_ROOT}/python/src/template.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
+    git add ${REPO_ROOT}/python/src/${NEW_DAY}.py
     code ${REPO_ROOT}/python/src/${NEW_DAY}.py
+
+    # Rust
+    cp ${REPO_ROOT}/rust/src/d01.rs ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
+    git add ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
+    code ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
+
     code ${REPO_ROOT}/input/${NEW_DAY}
+    # Last so that this is the file that has focus
     code ${REPO_ROOT}/input/${NEW_DAY}-example
 }
 

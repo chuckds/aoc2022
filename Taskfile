@@ -49,6 +49,12 @@ function newday {
     code ${REPO_ROOT}/input/${NEW_DAY}-example
 }
 
+function fmt {
+    black python/src
+    pushd rust
+    cargo fmt
+    popd
+}
 
 function timeday {
     if [ -z "$1" ]; then

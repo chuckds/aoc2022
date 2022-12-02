@@ -28,8 +28,7 @@ function newday {
     touch ${REPO_ROOT}/input/${NEW_DAY}
     touch ${REPO_ROOT}/input/${NEW_DAY}-example
 
-    #cp ${REPO_ROOT}/python/src/d02.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
-    touch ${REPO_ROOT}/python/src/${NEW_DAY}.py
+    cp ${REPO_ROOT}/python/src/template.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
     echo "#${NEW_DAY}p1p2 ${NEW_DAY}-example (0, 0)" >> ${REPO_ROOT}/answers
     echo "#${NEW_DAY}p1p2 ${NEW_DAY} (0, 0)" >> ${REPO_ROOT}/answers
     git add ${REPO_ROOT}/python/src/${NEW_DAY}.py ${REPO_ROOT}/input/${NEW_DAY} ${REPO_ROOT}/input/${NEW_DAY}-example

@@ -15,9 +15,3 @@ This runs mypy and pytest. Also set up your repo with the precommit check
 ```
 ./Taskfile initrepo
 ```
-
-## Python
-Current pattern to run is:
-```
-python/src/d01.py input/d01
-```

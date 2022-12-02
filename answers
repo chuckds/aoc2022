@@ -1,3 +1,5 @@
 #<module><function> <input-file> <expected return>
 d01p1p2 d01-example (24000, 45000)
 d01p1p2 d01 (71924, 210406)
+d02p1p2 d02-example (15, 12)
+d02p1p2 d02 (8392, 10116)

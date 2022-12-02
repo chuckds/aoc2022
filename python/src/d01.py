@@ -4,10 +4,13 @@ Advent Of Code 2022 Day 1
 """
 
 import bisect
-import pathlib
+from pathlib import Path
 
 
-def p1p2(input_file: pathlib.Path) -> tuple[int, int]:
+repo_root = Path(__file__).parent.parent.parent
+
+
+def p1p2(input_file: Path = repo_root / "input" / "d01-example") -> tuple[int, int]:
     current_sum = 0
     sorted_elves: list[int] = []
     for line in input_file.read_text().splitlines():

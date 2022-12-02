@@ -1,8 +1,7 @@
-use std::collections::BinaryHeap;
 use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 
 use crate::utils;
-
 
 pub fn p1p2(input_file: &str) -> (i32, i32) {
     let mut current_sum = 0;
@@ -16,7 +15,7 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
                 sorted_elves.pop();
             }
             current_sum = 0;
-        } else{
+        } else {
             current_sum += cal.parse::<i32>().unwrap();
         }
     }
@@ -32,7 +31,6 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
 
     (*sorted_elves.first().unwrap(), sorted_elves.iter().sum())
 }
-
 
 #[test]
 fn d01_test() {

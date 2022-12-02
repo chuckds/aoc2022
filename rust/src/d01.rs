@@ -31,9 +31,3 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
 
     (*sorted_elves.first().unwrap(), sorted_elves.iter().sum())
 }
-
-#[test]
-fn d01_test() {
-    assert_eq!((24000, 45000), p1p2("../input/d01-example"));
-    assert_eq!((71924, 210406), p1p2("../input/d01"));
-}

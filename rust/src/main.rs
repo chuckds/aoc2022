@@ -1,9 +1,10 @@
 mod d01;
+mod d02;
 mod utils;
 
 fn main() {
-    let (p1, p2) = d01::p1p2("../input/d01");
-    println!("p1: {}, p2: {}", p1, p2);
+    println!("{:?}", d01::p1p2("../input/d01-example"));
+    println!("{:?}", d02::p1p2("../input/d02-example"));
 }
 
 #[test]

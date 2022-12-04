@@ -22,7 +22,7 @@ def p1p2(input_file: Path = repo_root / "input" / "d03") -> tuple[int, int]:
     group_unique_items: Counter[str] = Counter()
     for index, line in enumerate(input_file.read_text().splitlines()):
         comp1 = set(line[: len(line) // 2])
-        comp2 = set(line[len(line) // 2 :])
+        comp2 = set(line[len(line) // 2:])
         p1 += item_to_prio((comp1 & comp2).pop())
         group_unique_items.update(set(line))
         if index % 3 == 2:

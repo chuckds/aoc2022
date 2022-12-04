@@ -9,5 +9,8 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
         inputs.push(tokens);
     }
     println!("{:?}", inputs);
+    //for (opp_code, your_code) in inputs.iter() {
+    //    println("opp {}, your {}", opp_code, your_code);
+    //}
     (0, 0)
 }

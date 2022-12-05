@@ -67,12 +67,8 @@ def p1p2(input_file: Path = repo_root / "input" / "d02-example") -> tuple[int, i
 
     p1, p2 = (0, 0)
     for opp_code, your_code in inputs:
-        p1 += move_from_your_code[your_code].play(
-            move_from_opp_code[opp_code].score
-        )
+        p1 += move_from_your_code[your_code].play(move_from_opp_code[opp_code].score)
         result = your_code
-        p2 += move_from_opp_code[opp_code].score_given_result(
-            result_scores[result]
-        )
+        p2 += move_from_opp_code[opp_code].score_given_result(result_scores[result])
 
     return (p1, p2)

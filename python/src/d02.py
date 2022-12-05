@@ -65,16 +65,14 @@ move_from_your_code = {m.your_code: m for m in moves}
 def p1p2(input_file: Path = repo_root / "input" / "d02-example") -> tuple[int, int]:
     inputs = [line.split() for line in input_file.read_text().splitlines()]
 
-    p1_score = 0
+    p1, p2 = (0, 0)
     for opp_code, your_code in inputs:
-        p1_score += move_from_your_code[your_code].play(
+        p1 += move_from_your_code[your_code].play(
             move_from_opp_code[opp_code].score
         )
-
-    p2_score = 0
-    for opp_code, result in inputs:
-        p2_score += move_from_opp_code[opp_code].score_given_result(
+        result = your_code
+        p2 += move_from_opp_code[opp_code].score_given_result(
             result_scores[result]
         )
 
-    return (p1_score, p2_score)
+    return (p1, p2)

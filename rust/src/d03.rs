@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use crate::utils;
 
 fn char_to_prio(a_char: char) -> i32 {
-    let offset = if a_char.is_ascii_lowercase() {96} else {38};
-    return a_char as i32 - offset
+    let offset = if a_char.is_ascii_lowercase() { 96 } else { 38 };
+    return a_char as i32 - offset;
 }
 
 pub fn p1p2(input_file: &str) -> (i32, i32) {
@@ -19,7 +19,10 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
         let comp2 = &item_list[(item_list.len() / 2)..];
         let comp1: HashSet<char> = HashSet::from_iter(comp1.chars());
         let comp2: HashSet<char> = HashSet::from_iter(comp2.chars());
-        let common_char = comp1.intersection(&comp2).next().expect("No items in common");
+        let common_char = comp1
+            .intersection(&comp2)
+            .next()
+            .expect("No items in common");
         p1 += char_to_prio(*common_char);
 
         // Part 2
@@ -28,7 +31,7 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
             for a_char in &group_bags[0] {
                 if group_bags[1].contains(&a_char) && group_bags[2].contains(&a_char) {
                     p2 += char_to_prio(*a_char);
-                    break
+                    break;
                 }
             }
             group_bags.clear();

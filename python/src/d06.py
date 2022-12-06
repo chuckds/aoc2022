@@ -21,7 +21,7 @@ def get_start_of_packet(datastream: str, window_size: int) -> int:
         move_forward = -1
         for index, char in enumerate(reversed(marker_window)):
             try:
-                dupe_idx = marker_window[:window_size - index - 1].index(char)
+                dupe_idx = marker_window[: window_size - index - 1].index(char)
                 move_forward = max(move_forward, dupe_idx + 1)
             except ValueError:
                 # char not present
@@ -36,7 +36,9 @@ def get_start_of_packet(datastream: str, window_size: int) -> int:
     return result
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d06-example") -> tuple[list[int], list[int]]:
+def p1p2(
+    input_file: Path = repo_root / "input" / "d06-example",
+) -> tuple[list[int], list[int]]:
     p1, p2 = ([], [])
     for ds in input_file.read_text().splitlines():
         p1.append(get_start_of_packet(ds, window_size=4))

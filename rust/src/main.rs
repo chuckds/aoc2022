@@ -9,7 +9,6 @@ use rstest::rstest;
 
 type AoCSolver = fn(&str) -> (i32, i32);
 
-
 const TEST_MAP: [(&str, AoCSolver); 3] = [
     ("d01", d01::p1p2 as AoCSolver),
     ("d02", d02::p1p2 as AoCSolver),
@@ -18,8 +17,16 @@ const TEST_MAP: [(&str, AoCSolver); 3] = [
 
 fn main() {
     for (day, test_func) in TEST_MAP {
-        println!("{} example: {:?}", day, test_func(&format!("../input/{}-example", day)));
-        println!("{} full:    {:?}", day, test_func(&format!("../input/{}", day)));
+        println!(
+            "{} example: {:?}",
+            day,
+            test_func(&format!("../input/{}-example", day))
+        );
+        println!(
+            "{} full:    {:?}",
+            day,
+            test_func(&format!("../input/{}", day))
+        );
     }
 
     // Check the answers load

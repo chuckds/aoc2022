@@ -7,6 +7,8 @@ use std::collections::HashMap;
 
 use rstest::rstest;
 
+type AoCSolver = fn(&str) -> (i32, i32);
+
 fn main() {
     println!("{:?}", d01::p1p2("../input/d01-example"));
     println!("{:?}", d02::p1p2("../input/d02-example"));
@@ -23,18 +25,20 @@ fn test_hash() -> HashMap<String, (String, String)> {
     //let str_result_re = Regex::new(r"\(\"(?P<p1>.+)\", \"(?P<p2>.+)\"\)").unwrap();
     for line in utils::read_lines("../answers").unwrap() {
         let line = line.unwrap();
-        if let Some(caps) = answer_re.captures(&line) {
-            test_hash.insert(caps["part"].to_string(), (caps["input_file"].to_string(), caps["result"].to_string()));
-        } else {
-            println!("Failed to parse {}", line);
+        if line.starts_with("#") {
+            continue;
         }
+        let caps = answer_re.captures(&line).expect("Failed to parse line");
+        test_hash.insert(caps["part"].to_string(), (caps["input_file"].to_string(), caps["result"].to_string()));
     }
     test_hash
 }
 
-type AoCSolver = fn(&str) -> (i32, i32);
-
-fn run_day_test(day_part: &str, test_func: AoCSolver, test_hash: &HashMap<String, (String, String)>) {
+#[rstest]
+#[case("d01p1p2", d01::p1p2 as AoCSolver)]
+#[case("d02p1p2", d02::p1p2 as AoCSolver)]
+#[case("d03p1p2", d03::p1p2 as AoCSolver)]
+fn day_test(test_hash: &HashMap<String, (String, String)>, #[case] day_part: &str, #[case] test_func: AoCSolver) {
     let (input_file, expected_result) = test_hash.get(day_part).expect("Can't find day in hash");
     let int_result_re = regex::Regex::new(r"\((?P<p1>[0-9]+), (?P<p2>[0-9]+)\)").unwrap();
     let retval_caps = int_result_re.captures(&expected_result).expect("Failed to parse result");
@@ -43,12 +47,4 @@ fn run_day_test(day_part: &str, test_func: AoCSolver, test_hash: &HashMap<String
         retval_caps["p2"].parse::<i32>().unwrap(),
     );
     assert_eq!(expected_result, test_func(&format!("{}{}", "../input/", input_file)));
-}
-
-#[rstest]
-#[case("d01p1p2", d01::p1p2 as AoCSolver)]
-#[case("d02p1p2", d02::p1p2 as AoCSolver)]
-#[case("d03p1p2", d03::p1p2 as AoCSolver)]
-fn day_test(test_hash: &HashMap<String, (String, String)>, #[case] day_str: &str, #[case] test_func: AoCSolver) {
-    run_day_test(day_str, test_func, test_hash);
 }

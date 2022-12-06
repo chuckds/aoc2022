@@ -1,4 +1,3 @@
-#!/bin/env python3
 """
 Advent Of Code 2022 Day X
 """

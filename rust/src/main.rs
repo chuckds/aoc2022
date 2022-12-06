@@ -9,10 +9,20 @@ use rstest::rstest;
 
 type AoCSolver = fn(&str) -> (i32, i32);
 
+
+const TEST_MAP: [(&str, AoCSolver); 3] = [
+    ("d01", d01::p1p2 as AoCSolver),
+    ("d02", d02::p1p2 as AoCSolver),
+    ("d03", d03::p1p2 as AoCSolver),
+];
+
 fn main() {
-    println!("{:?}", d01::p1p2("../input/d01-example"));
-    println!("{:?}", d02::p1p2("../input/d02-example"));
-    println!("{:?}", d03::p1p2("../input/d03-example"));
+    for (day, test_func) in TEST_MAP {
+        println!("{} example: {:?}", day, test_func(&format!("../input/{}-example", day)));
+        println!("{} full:    {:?}", day, test_func(&format!("../input/{}", day)));
+    }
+
+    // Check the answers load
     let _ = test_hash();
 }
 
@@ -31,7 +41,9 @@ fn test_hash() -> HashMap<String, (String, String)> {
         }
         let caps = answer_re.captures(&line).expect("Failed to parse line");
         test_hash.insert(
-            caps["part"].to_string(),
+            // Just keep the first 3 chars, the rest is for python to know what
+            // method to call, but that is specified manually for rust
+            caps["part"][..3].to_string(),
             (caps["input_file"].to_string(), caps["result"].to_string()),
         );
     }
@@ -39,15 +51,15 @@ fn test_hash() -> HashMap<String, (String, String)> {
 }
 
 #[rstest]
-#[case("d01p1p2", d01::p1p2 as AoCSolver)]
-#[case("d02p1p2", d02::p1p2 as AoCSolver)]
-#[case("d03p1p2", d03::p1p2 as AoCSolver)]
+#[case("d01", d01::p1p2 as AoCSolver)]
+#[case("d02", d02::p1p2 as AoCSolver)]
+#[case("d03", d03::p1p2 as AoCSolver)]
 fn day_test(
     test_hash: &HashMap<String, (String, String)>,
-    #[case] day_part: &str,
+    #[case] day: &str,
     #[case] test_func: AoCSolver,
 ) {
-    let (input_file, expected_result) = test_hash.get(day_part).expect("Can't find day in hash");
+    let (input_file, expected_result) = test_hash.get(day).expect("Can't find day in hash");
     let int_result_re = regex::Regex::new(r"\((?P<p1>[0-9]+), (?P<p2>[0-9]+)\)").unwrap();
     let retval_caps = int_result_re
         .captures(&expected_result)

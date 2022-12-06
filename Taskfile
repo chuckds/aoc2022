@@ -41,7 +41,7 @@ function newday {
     code ${REPO_ROOT}/python/src/${NEW_DAY}.py
 
     # Rust
-    cp ${REPO_ROOT}/rust/src/d01.rs ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
+    cp ${REPO_ROOT}/rust/src/template.rs ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
     git add ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
     code ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
 

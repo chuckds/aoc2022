@@ -12,16 +12,14 @@ from pathlib import Path
 
 repo_root = Path(__file__).parent.parent.parent
 
+
 @dataclass
 class Dir:
     name: str
     parent: Dir | None = None
     direct_size: int = 0
     subdirs: dict[str, Dir] = field(default_factory=dict)
-    too_big: bool = False
-
-    def child_dir(self, dir_name: str) -> Dir:
-        return self.subdirs[dir_name]
+    rolled_up: bool = False
 
     def add_child_dir(self, dir_name: str) -> Dir:
         new_dir = Dir(dir_name, self)
@@ -29,33 +27,31 @@ class Dir:
         return new_dir
 
 
-def collapse_tree_to_limit(size_limit: int, dirs: list[Dir]) -> int:
-    sum_of_dirs = 0
-    # Invarient: directories in this list have no child dirs!
-    dirs_to_check = [d for d in dirs if not d.subdirs]
-    while dirs_to_check:
-        dir = dirs_to_check.pop()
-        if dir.direct_size > size_limit:
-            if dir.parent is not None:
-                dir.parent.too_big = True
-        else:
-            sum_of_dirs += dir.direct_size  # This dir counts
-            if dir.parent and not dir.parent.too_big:
-                dir.parent.direct_size += dir.direct_size
-                del dir.parent.subdirs[dir.name]
-                if dir.parent.direct_size > size_limit:
-                    dir.parent.too_big = True
-                elif not dir.parent.subdirs:
-                    dirs_to_check.append(dir.parent)
-    return sum_of_dirs
-
-
 DISK_SIZE = 70000000
 FREE_SPACE_REQUIRED = 30000000
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d07-example") -> tuple[int, int]:
-    p1, p2 = (0, 0)
+def collapse_tree_to_limit(size_limit: int, dirs: list[Dir]) -> tuple[int, int]:
+    sum_of_dirs = 0
+    smallest_dir_larger_than_limit = DISK_SIZE
+    # Invarient: directories in this list have no child dirs
+    dirs_to_check = [d for d in dirs if not d.subdirs and not d.rolled_up]
+    while dirs_to_check:
+        dir = dirs_to_check.pop()
+        if dir.direct_size <= size_limit:
+            dir.rolled_up = True
+            sum_of_dirs += dir.direct_size  # This dir counts
+            if dir.parent:
+                dir.parent.direct_size += dir.direct_size
+                del dir.parent.subdirs[dir.name]
+                if not dir.parent.subdirs:
+                    dirs_to_check.append(dir.parent)
+        else:
+            smallest_dir_larger_than_limit = min(smallest_dir_larger_than_limit, dir.direct_size)
+    return (sum_of_dirs, smallest_dir_larger_than_limit)
+
+
+def p1p2(input_file: Path = repo_root / "input" / "d07") -> tuple[int, int]:
     all_dirs: list[Dir] = []
     current_dir: Dir | None = None
     total_space_used = 0
@@ -66,7 +62,7 @@ def p1p2(input_file: Path = repo_root / "input" / "d07-example") -> tuple[int, i
                 assert current_dir is not None
                 current_dir = current_dir.parent
             elif current_dir:
-                current_dir = current_dir.child_dir(newdir)
+                current_dir = current_dir.subdirs[newdir]
             else:
                 # First line case
                 current_dir = Dir(newdir)
@@ -86,9 +82,8 @@ def p1p2(input_file: Path = repo_root / "input" / "d07-example") -> tuple[int, i
             current_dir.direct_size += size_i
 
     space_to_free = FREE_SPACE_REQUIRED - (DISK_SIZE - total_space_used)
-    print(f"{total_space_used=} {space_to_free=}")
-
-    p1 = collapse_tree_to_limit(100000, all_dirs)
-    print(all_dirs)
+    (p1, _) = collapse_tree_to_limit(100000, all_dirs)
+    assert space_to_free >= 100000
+    (_, p2) = collapse_tree_to_limit(space_to_free, all_dirs)
 
     return (p1, p2)

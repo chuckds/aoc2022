@@ -1,18 +1,18 @@
 use std::collections::HashSet;
 
-use crate::utils;
+use crate::utils::*;
 
 fn char_to_prio(a_char: char) -> i32 {
     let offset = if a_char.is_ascii_lowercase() { 96 } else { 38 };
     return a_char as i32 - offset;
 }
 
-pub fn p1p2(input_file: &str) -> (i32, i32) {
+pub fn p1p2(input_file: &str) -> AoCSolver {
     let mut p1: i32 = 0;
     let mut p2: i32 = 0;
 
     let mut group_bags: Vec<HashSet<char>> = Vec::with_capacity(3);
-    for line in utils::read_lines(input_file).unwrap() {
+    for line in read_lines(input_file).unwrap() {
         let item_list = line.unwrap();
 
         let comp1 = &item_list[..(item_list.len() / 2)];
@@ -37,5 +37,6 @@ pub fn p1p2(input_file: &str) -> (i32, i32) {
             group_bags.clear();
         }
     }
-    (p1, p2)
+    AoCSolver::BothParts(AoCResult::Number(p1 as i64),
+                         AoCResult::Number(p2 as i64))
 }

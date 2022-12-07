@@ -1,12 +1,13 @@
-use crate::utils;
+use crate::utils::*;
 
-pub fn p1p2(input_file: &str) -> (i32, i32) {
-    let mut p1: i32 = 0;
-    let mut p2: i32 = 0;
+pub fn p1p2(input_file: &str) -> AoCSolver {
+    let mut p1: i64 = 0;
+    let mut p2: i64 = 0;
 
     for line in utils::read_lines(input_file).unwrap() {
         let line = line.unwrap();
     }
 
-    (p1, p2)
+    AoCSolver::BothParts(AoCResult::Number(p1),
+                         AoCResult::Number(p2))
 }

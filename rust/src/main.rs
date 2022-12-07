@@ -37,7 +37,7 @@ fn main() {
     }
 
     // Check the answers load
-    println!("THJ {:?}", test_hash_json());
+    test_hash_json();
 }
 
 fn json_to_aocresult(json_val: &json::JsonValue) -> AoCResult {
@@ -92,7 +92,7 @@ fn day_test_json(test_hash_json: &TestJsonHash, #[case] day: &str, #[case] test_
         match expected_result {
             (AoCResult::Number(n1), AoCResult::Number(n2)) => {
                 assert_eq!((*n1, *n2), test_func(&input_path))
-            }
+            },
             _ => panic!("Unsupported result type"),
         }
     }

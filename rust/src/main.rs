@@ -57,26 +57,30 @@ type TestJsonHash = HashMap<String, Vec<(String, (AoCResult, AoCResult))>>;
 #[once]
 fn test_hash_json() -> TestJsonHash {
     println!("Loading test hash json");
-    let mut test_hash = HashMap::new();
+
     let json = std::fs::read_to_string("../answers.json").expect("Unable to read json answers");
     let json = json::parse(&json).unwrap();
-    if let json::JsonValue::Array(ref tests) = json {
-        for test_info in tests {
-            if let json::JsonValue::Array(ref test_info) = test_info {
-                if let json::JsonValue::Array(ref results) = test_info[3] {
-                    test_hash
-                        .entry(test_info[0].as_str().unwrap().to_string())
-                        .or_insert(Vec::new())
-                        .push((
-                            test_info[2].as_str().unwrap().to_string(),
-                            (
-                                json_to_aocresult(&results[0]),
-                                json_to_aocresult(&results[1]),
-                            ),
-                        ));
-                }
-            }
-        }
+    let json::JsonValue::Array(ref tests) = json else {
+        panic!("Main test array failed to parse");
+    };
+    let mut test_hash = HashMap::new();
+    for test_info in tests {
+        let json::JsonValue::Array(ref test_info) = test_info else {
+            panic!("Unable to parse test info array: {:?}", test_info);
+        };
+        let json::JsonValue::Array(ref results) = test_info[3] else {
+            panic!("Unable to parse test result");
+        };
+        test_hash
+            .entry(test_info[0].as_str().unwrap().to_string())
+            .or_insert(Vec::new())
+            .push((
+                test_info[2].as_str().unwrap().to_string(),
+                (
+                    json_to_aocresult(&results[0]),
+                    json_to_aocresult(&results[1]),
+                ),
+            ));
     }
     test_hash
 }

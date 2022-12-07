@@ -1,15 +1,9 @@
-import re
 import json
 import pytest
 import pathlib
 import importlib
 
 from typing import Any
-
-
-puzzle_re = re.compile(
-    r"(?P<day>d[0-9]+)(?P<part>[^ ]+) (?P<input_file>[^ ]+) (?P<result>.*)"
-)
 
 
 def get_puzzle_info(examples: bool) -> list[tuple[str, str, str, str]]:

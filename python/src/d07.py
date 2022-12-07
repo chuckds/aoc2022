@@ -47,7 +47,9 @@ def collapse_tree_to_limit(size_limit: int, dirs: list[Dir]) -> tuple[int, int]:
                 if not dir.parent.subdirs:
                     dirs_to_check.append(dir.parent)
         else:
-            smallest_dir_larger_than_limit = min(smallest_dir_larger_than_limit, dir.direct_size)
+            smallest_dir_larger_than_limit = min(
+                smallest_dir_larger_than_limit, dir.direct_size
+            )
     return (sum_of_dirs, smallest_dir_larger_than_limit)
 
 

@@ -21,7 +21,8 @@ class Tree:
 
 def p1p2(input_file: Path = repo_root / "input" / "d08") -> tuple[int, int]:
     p1, p2 = (0, 0)
-    rows, cols = [], []
+    rows: list[list[Tree]] = []
+    cols: list[list[Tree]] = []
     for input_line in input_file.read_text().splitlines():
         rows.append([Tree(int(char)) for char in input_line])
     for idx in range(len(rows)):

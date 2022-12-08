@@ -10,26 +10,28 @@ use crate::utils::*;
 
 use rstest::rstest;
 
-const TEST_MAP: [(&str, AoCSolverFunc); 5] = [
-    ("d01", d01::p1p2),
-    ("d02", d02::p1p2),
-    ("d03", d03::p1p2),
-    ("d04", d04::p1p2),
-    ("d05", d05::p1p2),
+const TEST_MAP: [(&str, AoCSolverFunc, bool); 5] = [
+    ("d01", d01::p1p2, true),
+    ("d02", d02::p1p2, true),
+    ("d03", d03::p1p2, true),
+    ("d04", d04::p1p2, true),
+    ("d05", d05::p1p2, false),
 ];
 
 fn main() {
-    for (day, test_func) in TEST_MAP {
+    for (day, test_func, do_main) in TEST_MAP {
         println!(
             "{} example: {:?}",
             day,
             test_func(&format!("../input/{}-example", day))
         );
-        println!(
-            "{} full:    {:?}",
-            day,
-            test_func(&format!("../input/{}", day))
-        );
+        if do_main {
+            println!(
+                "{} full:    {:?}",
+                day,
+                test_func(&format!("../input/{}", day))
+            );
+        }
     }
 
     // Check the answers load

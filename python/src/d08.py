@@ -1,26 +1,47 @@
-#!/bin/env python3
 """
-Advent Of Code 2022 d08
+Advent Of Code 2022 Day 8
 """
 
 from __future__ import annotations
 
 
+from typing import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
 
-repo_root = Path(__file__).parent.parent.parent
+input_dir = Path(__file__).parent.parent.parent / "input"
 
 
 @dataclass
 class Tree:
     height: int
     visible: bool = False
+    scenic_score: int = 1
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d08") -> tuple[int, int]:
-    p1, p2 = (0, 0)
+def viewing_distance(tree_line: Iterable[Tree]) -> int:
+    highest_tree = -1
+    new_visibles = 0
+
+    height_to_closest_idx = [0] * 10
+    for index, tree in enumerate(tree_line):
+        # Part 1
+        if not tree.visible and tree.height > highest_tree:
+            tree.visible = True
+            new_visibles += 1
+        highest_tree = max(tree.height, highest_tree)
+
+        # Part 2
+        idx_of_blocking_tree = max(height_to_closest_idx[tree.height:])
+        tree.scenic_score *= (index - idx_of_blocking_tree)
+        height_to_closest_idx[tree.height] = index
+
+    return new_visibles
+
+
+def p1p2(input_file: Path = input_dir / "d08") -> tuple[int, int]:
+    p1 = 0
     rows: list[list[Tree]] = []
     cols: list[list[Tree]] = []
     for input_line in input_file.read_text().splitlines():
@@ -31,13 +52,8 @@ def p1p2(input_file: Path = repo_root / "input" / "d08") -> tuple[int, int]:
     for lines in (rows, (reversed(row) for row in rows),
                   cols, (reversed(col) for col in cols)):
         for line in lines:
-            highest_tree = -1
-            for tree in line:
-                if not tree.visible and tree.height > highest_tree:
-                    tree.visible = True
-                    p1 += 1
-                highest_tree = max(tree.height, highest_tree)
-                if highest_tree == 9:
-                    break
+            p1 += viewing_distance(line)
+
+    p2 = max(tree.scenic_score for row in rows for tree in row)
 
     return (p1, p2)

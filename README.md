@@ -11,7 +11,12 @@ Run tests with:
 ./Taskfile
 ```
 
-This runs mypy and pytest. Also set up your repo with the precommit check
+This runs mypy, pytest and cargo test for rust. Also set up the repo with the precommit check
 ```
 ./Taskfile initrepo
+```
+
+Make sure rust and python are formatted in a standard way:
+```
+./Taskfile fmt
 ```

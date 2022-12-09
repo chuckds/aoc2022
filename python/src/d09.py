@@ -1,5 +1,5 @@
 """
-Advent Of Code 2022 d09
+Advent Of Code 2022 Day 9
 """
 
 from __future__ import annotations
@@ -11,13 +11,6 @@ from typing import NamedTuple
 
 input_dir = Path(__file__).parent.parent.parent / "input"
 
-"""
-..DMD...
-.DAAAD.
-.MATAM.
-.DAAAD.
-..DMD.
-"""
 
 class Move(NamedTuple):
     direction: str
@@ -45,30 +38,36 @@ class Position(NamedTuple):
     def is_adjacent(self, other: Position) -> bool:
         return self.x - 1 <= other.x <= self.x + 1 and self.y - 1 <= other.y <= self.y + 1
 
-
-def get_follow_posn(from_posn: Position, heading_to: Position) -> Position:
-    x_offset = heading_to.x - from_posn.x
-    y_offset = heading_to.y - from_posn.y
-    x_offset = x_offset // abs(x_offset) if x_offset else 0
-    y_offset = y_offset // abs(y_offset) if y_offset else 0
-    return Position(from_posn.x + x_offset, from_posn.y + y_offset)
+    def get_follow_posn(self, heading_to: Position) -> Position:
+        offset = Position(heading_to.x - self.x, heading_to.y - self.y)
+        offset = Position(*(n // abs(n) if n else 0 for n in offset))
+        return Position(self.x + offset.x, self.y + offset.y)
 
 
 def p1p2(input_file: Path = input_dir / "d09") -> tuple[int, int]:
-    p2 = 0
     moves = []
     head_trail = [Position(0, 0)]
     for line in input_file.read_text().splitlines():
         dir, len_str = line.split()
         moves.append(Move(dir, int(len_str)))
         head_trail.extend(head_trail[-1].after_move(moves[-1]))
-    print(head_trail)
-    tail_trail = [Position(0, 0)]
-    trail_elements = [Position(0, 0)] * 9
-    tail_end_trail = [Position(0, 0)]
-    for head_posn in head_trail:
-        if not head_posn.is_adjacent(tail_trail[-1]):
-            tail_trail.append(get_follow_posn(tail_trail[-1], head_posn))
 
-    unique_posn = set(tail_trail)
-    return (len(unique_posn), p2)
+    rope_elements = [Position(0, 0)] * 9
+    p1_trail = set([Position(0, 0)])
+    tail_end_trail = set([Position(0, 0)])
+    for head_posn in head_trail:
+        pulled_towards = head_posn
+        for idx, rope_element in enumerate(rope_elements):
+            if pulled_towards.is_adjacent(rope_element):
+                # No movement so the rest of the rope won't change
+                break
+            else:
+                new_posn = rope_element.get_follow_posn(pulled_towards)
+                pulled_towards = new_posn
+                rope_elements[idx] = new_posn
+                if idx == 0:  # p1
+                    p1_trail.add(new_posn)
+                elif idx == 8:  # p2
+                    tail_end_trail.add(new_posn)
+
+    return (len(p1_trail), len(tail_end_trail))

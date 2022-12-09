@@ -49,6 +49,8 @@ def p1p2(input_file: Path = input_dir / "d08") -> tuple[int, int]:
     for idx in range(len(rows)):
         cols.append([row[idx] for row in rows])
 
+    # Go through each row forwards and backwards to calculate looking left and looking right distances
+    # Similar for columns (up and down)
     for lines in (rows, (reversed(row) for row in rows),
                   cols, (reversed(col) for col in cols)):
         for line in lines:

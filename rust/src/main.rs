@@ -15,7 +15,7 @@ const TEST_MAP: [(&str, AoCSolverFunc, bool); 5] = [
     ("d02", d02::p1p2, true),
     ("d03", d03::p1p2, true),
     ("d04", d04::p1p2, true),
-    ("d05", d05::p1p2, false),
+    ("d05", d05::p1p2, true),
 ];
 
 fn main() {

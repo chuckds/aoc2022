@@ -52,14 +52,9 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
             stacks[a_move.to_stack as usize].push_front(*char_to_move);
         }
     }
-    let mut p1 = String::from("");
-    let mut p2 = String::from("");
-    for mut stack in p1_stacks {
-        p1.push(stack.pop_front().unwrap());
-    }
-    for mut stack in stacks {
-        p2.push(stack.pop_front().unwrap());
-    }
+
+    let p1 = p1_stacks.iter().map(|x| x.front().unwrap()).collect::<String>();
+    let p2 = stacks.iter().map(|x| x.front().unwrap()).collect::<String>();
     AoCSolver::BothParts(AoCResult::String(p1),
                          AoCResult::String(p2))
 }

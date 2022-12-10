@@ -36,17 +36,30 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
         }
     }
 
+    let mut p1_stacks: Vec<VecDeque<char>> = Vec::new();
+    for stack in &stacks {
+        p1_stacks.push(stack.clone());
+    }
+
     for a_move in moves {
-        //let chars_to_move = stacks[a_move.from_stack as usize].drain(..a_move.num_move as usize);
-        for _ in 0..a_move.num_move {
-            let char_to_move = stacks[a_move.from_stack as usize].pop_front().unwrap();
-            stacks[a_move.to_stack as usize].push_front(char_to_move);
+        let chars_to_move = p1_stacks[a_move.from_stack as usize].drain(..a_move.num_move as usize).collect::<Vec<_>>();
+        for char_to_move in chars_to_move {
+            p1_stacks[a_move.to_stack as usize].push_front(char_to_move);
+        }
+        
+        let chars_to_move = stacks[a_move.from_stack as usize].drain(..a_move.num_move as usize).collect::<Vec<_>>();
+        for char_to_move in chars_to_move.iter().rev() {
+            stacks[a_move.to_stack as usize].push_front(*char_to_move);
         }
     }
     let mut p1 = String::from("");
+    let mut p2 = String::from("");
+    for mut stack in p1_stacks {
+        p1.push(stack.pop_front().unwrap());
+    }
     for mut stack in stacks {
-        p1.push(stack.pop_front().unwrap())
+        p2.push(stack.pop_front().unwrap());
     }
     AoCSolver::BothParts(AoCResult::String(p1),
-                         AoCResult::String(String::from("")))
+                         AoCResult::String(p2))
 }

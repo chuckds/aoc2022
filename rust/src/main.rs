@@ -88,6 +88,7 @@ fn test_hash_json() -> TestJsonHash {
 #[case("d02", d02::p1p2)]
 #[case("d03", d03::p1p2)]
 #[case("d04", d04::p1p2)]
+#[case("d05", d05::p1p2)]
 fn day_test_json(test_hash_json: &TestJsonHash, #[case] day: &str, #[case] test_func: AoCSolverFunc) {
     for (input_file, expected_result) in test_hash_json.get(day).expect("Can't find day in hash") {
         let input_path = format!("{}{}", "../input/", input_file);

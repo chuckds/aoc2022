@@ -4,9 +4,9 @@ use crate::utils::*;
 
 #[derive(Debug)]
 struct Move {
-    num_move: u32,
-    from_stack: u32,
-    to_stack: u32,
+    num_move: usize,
+    from_stack: usize,
+    to_stack: usize,
 }
 
 pub fn p1p2(input_file: &str) -> AoCSolver {
@@ -31,7 +31,7 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
             }
         } else if !line.is_empty() {
             let (num_move, from_stack, to_stack) = line.split(" ")
-                .skip(1).step_by(2).map(|x| x.parse::<u32>().unwrap()).next_tuple().unwrap();
+                .skip(1).step_by(2).map(|x| x.parse::<usize>().unwrap()).next_tuple().unwrap();
             moves.push(Move {num_move: num_move, from_stack: from_stack - 1, to_stack: to_stack - 1});
         }
     }
@@ -42,14 +42,14 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
     }
 
     for a_move in moves {
-        let chars_to_move = p1_stacks[a_move.from_stack as usize].drain(..a_move.num_move as usize).collect::<Vec<_>>();
+        let chars_to_move = p1_stacks[a_move.from_stack].drain(..a_move.num_move).collect::<Vec<_>>();
         for char_to_move in chars_to_move {
-            p1_stacks[a_move.to_stack as usize].push_front(char_to_move);
+            p1_stacks[a_move.to_stack].push_front(char_to_move);
         }
         
-        let chars_to_move = stacks[a_move.from_stack as usize].drain(..a_move.num_move as usize).collect::<Vec<_>>();
+        let chars_to_move = stacks[a_move.from_stack].drain(..a_move.num_move).collect::<Vec<_>>();
         for char_to_move in chars_to_move.iter().rev() {
-            stacks[a_move.to_stack as usize].push_front(*char_to_move);
+            stacks[a_move.to_stack].push_front(*char_to_move);
         }
     }
 

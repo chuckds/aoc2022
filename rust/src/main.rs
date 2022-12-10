@@ -23,13 +23,13 @@ fn main() {
         println!(
             "{} example: {:?}",
             day,
-            test_func(&format!("../input/{}-example", day))
+            test_func(&format!("../input/examples/{}", day))
         );
         if do_main {
             println!(
                 "{} full:    {:?}",
                 day,
-                test_func(&format!("../input/{}", day))
+                test_func(&format!("../input/real/{}", day))
             );
         }
     }

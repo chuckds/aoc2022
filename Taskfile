@@ -28,9 +28,10 @@ function newday {
 
     NEW_DAY=$1
     echo $NEW_DAY
-    touch ${REPO_ROOT}/input/${NEW_DAY}
-    touch ${REPO_ROOT}/input/${NEW_DAY}-example
-    git add ${REPO_ROOT}/input/${NEW_DAY} ${REPO_ROOT}/input/${NEW_DAY}-example
+    # Do NOT commit the real puzzle input - it shouldn't be shared!
+    aoc download -I --input-file input/real/${NEW_DAY}
+    touch ${REPO_ROOT}/input/examples/${NEW_DAY}
+    git add ${REPO_ROOT}/input/examples/${NEW_DAY}
 
     # Python
     cp ${REPO_ROOT}/python/src/template.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
@@ -43,9 +44,8 @@ function newday {
     git add ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
     code ${REPO_ROOT}/rust/src/${NEW_DAY}.rs
 
-    code ${REPO_ROOT}/input/${NEW_DAY}
     # Last so that this is the file that has focus
-    code ${REPO_ROOT}/input/${NEW_DAY}-example
+    code ${REPO_ROOT}/input/examples/${NEW_DAY}
 }
 
 function fmt {
@@ -63,7 +63,7 @@ function timeday {
 
     DAY=$1
     pushd ${REPO_ROOT}/python/src
-    python3 -m timeit "import ${DAY}; ${DAY}.p1p2('../input/${DAY}')"
+    python3 -m timeit "import ${DAY}; ${DAY}.p1p2('../input/real/${DAY}')"
     popd
 }
 

@@ -43,6 +43,7 @@ fn main() {
 fn json_to_aocresult(json_val: &json::JsonValue) -> AoCResult {
     match json_val {
         json::JsonValue::Short(a_string) => AoCResult::String(a_string.to_string()),
+        json::JsonValue::String(a_string) => AoCResult::String(a_string.to_string()),
         json::JsonValue::Number(_num) => AoCResult::Number(json_val.as_i64().unwrap()),
         json::JsonValue::Array(vec) => {
             AoCResult::NumVec(vec.iter().map(|x| x.as_i64().unwrap()).collect())

@@ -3,6 +3,7 @@ mod d02;
 mod d03;
 mod d04;
 mod d05;
+mod d06;
 mod utils;
 
 use std::collections::HashMap;
@@ -10,12 +11,13 @@ use crate::utils::*;
 
 use rstest::rstest;
 
-const TEST_MAP: [(&str, AoCSolverFunc, bool); 5] = [
+const TEST_MAP: [(&str, AoCSolverFunc, bool); 6] = [
     ("d01", d01::p1p2, true),
     ("d02", d02::p1p2, true),
     ("d03", d03::p1p2, true),
     ("d04", d04::p1p2, true),
     ("d05", d05::p1p2, true),
+    ("d06", d06::p1p2, false),
 ];
 
 fn main() {

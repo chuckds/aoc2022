@@ -26,10 +26,12 @@ function newday {
         return 2
     fi
 
-    NEW_DAY=$1
-    echo $NEW_DAY
+    RAW_DAY=$1
+    NEW_DAY=$(printf d%02d $RAW_DAY)
+    echo "Get day $RAW_DAY (pretty version $NEW_DAY)"
+
     # Do NOT commit the real puzzle input - it shouldn't be shared!
-    aoc download -I --input-file input/real/${NEW_DAY}
+    aoc download -I --input-file input/real/${NEW_DAY} --year 2022 --day $RAW_DAY
     touch ${REPO_ROOT}/input/examples/${NEW_DAY}
     git add ${REPO_ROOT}/input/examples/${NEW_DAY}
 
@@ -75,6 +77,12 @@ function help {
     echo "$0 <task> <args>"
     echo "Tasks:"
     compgen -A function | cat -n
+}
+
+function t2 {
+    DAY=$1
+    pp_day=$(printf %02d $DAY)
+    echo "$DAY becomes $pp_day"
 }
 
 TIMEFORMAT="Task completed in %3lR"

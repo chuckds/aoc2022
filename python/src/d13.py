@@ -18,6 +18,7 @@ input_dir = Path(__file__).parent.parent.parent / "input"
 class Packet:
     content: str
     at_idx: int = 1
+    end_idx: int = 0
 
     def next_value(self) -> Iterable[int | Packet]:
         from_idx = self.at_idx
@@ -31,7 +32,7 @@ class Packet:
                 case "[":
                     next_packet = Packet(self.content, from_idx + 1)
                     yield next_packet
-                    from_idx = next_packet.at_idx + 1  # Skip over the ]
+                    from_idx = next_packet.end_idx + 1  # Skip over the ]
                 case other_char:
                     num = ""
                     while other_char.isdigit():
@@ -39,7 +40,7 @@ class Packet:
                         from_idx += 1
                         other_char = self.content[from_idx]
                     yield int(num)
-        self.at_idx = from_idx
+        self.end_idx = from_idx
 
     def lt(left, right: Packet) -> bool | None:
         for l_val, r_val in zip_longest(left.next_value(), right.next_value()):
@@ -65,7 +66,7 @@ class Packet:
 
 
 def p1p2(input_file: Path = input_dir / "examples" / "d13") -> tuple[int, int]:
-    p1, p2 = (0, 0)
+    p1 = 0
     input_lines = input_file.read_text().splitlines()
     packets = [(Packet(input_lines[x]), Packet(input_lines[x + 1]))
                for x in range(0, len(input_lines), 3)]
@@ -74,7 +75,22 @@ def p1p2(input_file: Path = input_dir / "examples" / "d13") -> tuple[int, int]:
         if left.lt(right):
             p1 += 1 + pair_idx
 
-    return (p1, p2)
+    divider = Packet("[[2]]")
+    gt_div1 = []
+    divider_idx = 1
+    for packet in (packet for packet_pair in packets for packet in packet_pair):
+        if packet.lt(divider):
+            divider_idx += 1
+        else:
+            gt_div1.append(packet)
+    decoder_key = divider_idx
+
+    divider_idx += 1  # 2nd divider is bigger than the first so index + 1
+    divider = Packet("[[6]]")
+    divider_idx += len([1 for p in gt_div1 if p.lt(divider)])
+    decoder_key *= divider_idx
+
+    return (p1, decoder_key)
 
 
 if __name__ == "__main__":

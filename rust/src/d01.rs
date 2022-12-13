@@ -29,6 +29,8 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
     // Unpack the values out of Reverse otherwise sum doesn't work - wat?
     let sorted_elves: Vec<i64> = sorted_elves.iter().map(|Reverse(val)| *val).collect();
 
-    AoCSolver::BothParts(AoCResult::Number(*sorted_elves.first().unwrap()),
-                         AoCResult::Number(sorted_elves.iter().sum()))
+    AoCSolver::BothParts(
+        AoCResult::Number(*sorted_elves.first().unwrap()),
+        AoCResult::Number(sorted_elves.iter().sum()),
+    )
 }

@@ -10,8 +10,7 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
         p2.push(get_start_of_packet(&line, 4));
     }
 
-    AoCSolver::BothParts(AoCResult::NumVec(p1),
-                         AoCResult::NumVec(p2))
+    AoCSolver::BothParts(AoCResult::NumVec(p1), AoCResult::NumVec(p2))
 }
 
 fn get_start_of_packet(ds: &str, window_size: u32) -> i64 {

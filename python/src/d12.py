@@ -27,7 +27,9 @@ class GridLocation:
     def neighbours(self, grid: list[list[GridLocation]]) -> Iterator[GridLocation]:
         for row_delt in (-1, 0, 1):
             for col_delt in ((-1, 1), (0,))[row_delt]:
-                if 0 <= (self.row + row_delt) < len(grid) and 0 <= (self.col + col_delt) < len(grid[0]):
+                if 0 <= (self.row + row_delt) < len(grid) and 0 <= (
+                    self.col + col_delt
+                ) < len(grid[0]):
                     yield grid[self.row + row_delt][self.col + col_delt]
 
     def __lt__(self, other: GridLocation) -> bool:
@@ -37,7 +39,12 @@ class GridLocation:
 PassableCheck = Callable[[GridLocation, GridLocation], bool]
 
 
-def shortest_route_from(from_loc: GridLocation, dest_loc: GridLocation | None, grid: list[list[GridLocation]], passable: PassableCheck) -> int:
+def shortest_route_from(
+    from_loc: GridLocation,
+    dest_loc: GridLocation | None,
+    grid: list[list[GridLocation]],
+    passable: PassableCheck,
+) -> int:
     result = 0
     known_shortest: list[GridLocation] = []
     from_loc.shortest_path_here = 0
@@ -46,8 +53,7 @@ def shortest_route_from(from_loc: GridLocation, dest_loc: GridLocation | None, g
         from_loc = heapq.heappop(known_shortest)
         shortest_path = from_loc.shortest_path_here + 1
         for to_loc in from_loc.neighbours(grid):
-            if (passable(from_loc, to_loc) and
-                to_loc.shortest_path_here == -1):
+            if passable(from_loc, to_loc) and to_loc.shortest_path_here == -1:
                 to_loc.shortest_path_here = shortest_path
                 if to_loc == dest_loc:
                     # We're here!
@@ -89,8 +95,12 @@ def p1p2(input_file: Path = input_dir / "real" / "d12") -> tuple[int, int]:
 
     shortest_route_from(destination, None, rows, backwards)
 
-    p2 = min(loc.shortest_path_here for row in rows for loc in row
-             if loc.elevation == "a" and loc.shortest_path_here >= 0)
+    p2 = min(
+        loc.shortest_path_here
+        for row in rows
+        for loc in row
+        if loc.elevation == "a" and loc.shortest_path_here >= 0
+    )
     return (p1, p2)
 
 

@@ -18,7 +18,7 @@ input_dir = Path(__file__).parent.parent.parent / "input"
 
 
 def square(x: int) -> int:
-    return x ** 2
+    return x**2
 
 
 WorryOp = Callable[[int], int]
@@ -81,8 +81,9 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
 
 def p1p2(input_file: Path = input_dir / "real" / "d11") -> tuple[int, int]:
     input_lines = input_file.read_text().splitlines()
-    monkeys = [Monkey.from_lines(input_lines[x:x + 7])
-               for x in range(0, len(input_lines), 7)]
+    monkeys = [
+        Monkey.from_lines(input_lines[x : x + 7]) for x in range(0, len(input_lines), 7)
+    ]
     init_states = [m.items.copy() for m in monkeys]
     p1 = run_rounds(monkeys, div_3=True, rounds=20)
 

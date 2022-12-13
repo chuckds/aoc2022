@@ -37,6 +37,5 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
             group_bags.clear();
         }
     }
-    AoCSolver::BothParts(AoCResult::Number(p1 as i64),
-                         AoCResult::Number(p2 as i64))
+    AoCSolver::BothParts(AoCResult::Number(p1 as i64), AoCResult::Number(p2 as i64))
 }

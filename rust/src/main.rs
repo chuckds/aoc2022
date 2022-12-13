@@ -6,8 +6,8 @@ mod d05;
 mod d06;
 mod utils;
 
-use std::collections::HashMap;
 use crate::utils::*;
+use std::collections::HashMap;
 
 use rstest::rstest;
 
@@ -92,7 +92,11 @@ fn test_hash_json() -> TestJsonHash {
 #[case("d03", d03::p1p2)]
 #[case("d04", d04::p1p2)]
 #[case("d05", d05::p1p2)]
-fn day_test_json(test_hash_json: &TestJsonHash, #[case] day: &str, #[case] test_func: AoCSolverFunc) {
+fn day_test_json(
+    test_hash_json: &TestJsonHash,
+    #[case] day: &str,
+    #[case] test_func: AoCSolverFunc,
+) {
     for (input_file, expected_result) in test_hash_json.get(day).expect("Can't find day in hash") {
         let input_path = format!("{}{}", "../input/", input_file);
         println!("Testing {}", input_file);

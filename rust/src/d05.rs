@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
-use itertools::Itertools;
 use crate::utils::*;
+use itertools::Itertools;
+use std::collections::VecDeque;
 
 #[derive(Debug)]
 struct Move {
@@ -19,7 +19,7 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
             for (stack_num, stack_char) in line.chars().skip(1).step_by(4).enumerate() {
                 if stack_char == '1' {
                     stack_phase = false;
-                    break
+                    break;
                 } else {
                     if stack_num >= stacks.len() {
                         stacks.push(VecDeque::new());
@@ -30,9 +30,18 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
                 }
             }
         } else if !line.is_empty() {
-            let (num_move, from_stack, to_stack) = line.split(" ")
-                .skip(1).step_by(2).map(|x| x.parse::<usize>().unwrap()).next_tuple().unwrap();
-            moves.push(Move {num_move: num_move, from_stack: from_stack - 1, to_stack: to_stack - 1});
+            let (num_move, from_stack, to_stack) = line
+                .split(" ")
+                .skip(1)
+                .step_by(2)
+                .map(|x| x.parse::<usize>().unwrap())
+                .next_tuple()
+                .unwrap();
+            moves.push(Move {
+                num_move: num_move,
+                from_stack: from_stack - 1,
+                to_stack: to_stack - 1,
+            });
         }
     }
 
@@ -42,19 +51,28 @@ pub fn p1p2(input_file: &str) -> AoCSolver {
     }
 
     for a_move in moves {
-        let chars_to_move = p1_stacks[a_move.from_stack].drain(..a_move.num_move).collect::<Vec<_>>();
+        let chars_to_move = p1_stacks[a_move.from_stack]
+            .drain(..a_move.num_move)
+            .collect::<Vec<_>>();
         for char_to_move in chars_to_move {
             p1_stacks[a_move.to_stack].push_front(char_to_move);
         }
-        
-        let chars_to_move = stacks[a_move.from_stack].drain(..a_move.num_move).collect::<Vec<_>>();
+
+        let chars_to_move = stacks[a_move.from_stack]
+            .drain(..a_move.num_move)
+            .collect::<Vec<_>>();
         for char_to_move in chars_to_move.iter().rev() {
             stacks[a_move.to_stack].push_front(*char_to_move);
         }
     }
 
-    let p1 = p1_stacks.iter().map(|x| x.front().unwrap()).collect::<String>();
-    let p2 = stacks.iter().map(|x| x.front().unwrap()).collect::<String>();
-    AoCSolver::BothParts(AoCResult::String(p1),
-                         AoCResult::String(p2))
+    let p1 = p1_stacks
+        .iter()
+        .map(|x| x.front().unwrap())
+        .collect::<String>();
+    let p2 = stacks
+        .iter()
+        .map(|x| x.front().unwrap())
+        .collect::<String>();
+    AoCSolver::BothParts(AoCResult::String(p1), AoCResult::String(p2))
 }

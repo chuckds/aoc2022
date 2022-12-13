@@ -36,7 +36,9 @@ class Position(NamedTuple):
         return trail
 
     def is_adjacent(self, other: Position) -> bool:
-        return self.x - 1 <= other.x <= self.x + 1 and self.y - 1 <= other.y <= self.y + 1
+        return (
+            self.x - 1 <= other.x <= self.x + 1 and self.y - 1 <= other.y <= self.y + 1
+        )
 
     def get_follow_posn(self, heading_to: Position) -> Position:
         offset = Position(heading_to.x - self.x, heading_to.y - self.y)

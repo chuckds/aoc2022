@@ -17,7 +17,6 @@ pub enum AoCSolver {
 
 pub type AoCSolverFunc = fn(&str) -> AoCSolver;
 
-
 pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,

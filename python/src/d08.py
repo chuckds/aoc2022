@@ -33,8 +33,8 @@ def viewing_distance(tree_line: Iterable[Tree]) -> int:
         highest_tree = max(tree.height, highest_tree)
 
         # Part 2
-        idx_of_blocking_tree = max(height_to_closest_idx[tree.height:])
-        tree.scenic_score *= (index - idx_of_blocking_tree)
+        idx_of_blocking_tree = max(height_to_closest_idx[tree.height :])
+        tree.scenic_score *= index - idx_of_blocking_tree
         height_to_closest_idx[tree.height] = index
 
     return new_visibles
@@ -51,8 +51,12 @@ def p1p2(input_file: Path = input_dir / "d08") -> tuple[int, int]:
 
     # Go through each row forwards and backwards to calculate looking left and looking right distances
     # Similar for columns (up and down)
-    for lines in (rows, (reversed(row) for row in rows),
-                  cols, (reversed(col) for col in cols)):
+    for lines in (
+        rows,
+        (reversed(row) for row in rows),
+        cols,
+        (reversed(col) for col in cols),
+    ):
         for line in lines:
             p1 += viewing_distance(line)
 

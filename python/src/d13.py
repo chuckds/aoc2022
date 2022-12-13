@@ -68,8 +68,10 @@ class Packet:
 def p1p2(input_file: Path = input_dir / "examples" / "d13") -> tuple[int, int]:
     p1 = 0
     input_lines = input_file.read_text().splitlines()
-    packets = [(Packet(input_lines[x]), Packet(input_lines[x + 1]))
-               for x in range(0, len(input_lines), 3)]
+    packets = [
+        (Packet(input_lines[x]), Packet(input_lines[x + 1]))
+        for x in range(0, len(input_lines), 3)
+    ]
 
     for pair_idx, (left, right) in enumerate(packets):
         if left.lt(right):

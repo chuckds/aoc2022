@@ -7,8 +7,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 CRT_WIDTH = 40
@@ -25,7 +27,7 @@ def draw_pixel(cycle: int, reg_x: int) -> str:
     return result
 
 
-def p1p2(input_file: Path = input_dir / "real" / "d10") -> tuple[int, str]:
+def p1p2(input_file: Path = real) -> tuple[int, str]:
     p1, p2 = (0, "")
     reg_x = 1
     cycle_count = 1

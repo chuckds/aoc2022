@@ -7,8 +7,10 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
+import utils
 
-repo_root = Path(__file__).parent.parent.parent
+
+real = utils.real_input()
 
 
 def item_to_prio(item: str) -> int:
@@ -16,7 +18,7 @@ def item_to_prio(item: str) -> int:
     return ord(item) - offset
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d03") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     p1, p2 = (0, 0)
     group_unique_items: Counter[str] = Counter()
     for index, line in enumerate(input_file.read_text().splitlines()):

@@ -7,8 +7,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import utils
 
-repo_root = Path(__file__).parent.parent.parent
+
+real = utils.real_input()
 
 
 def range_to_set(range_str: str) -> set[int]:
@@ -16,7 +18,7 @@ def range_to_set(range_str: str) -> set[int]:
     return set(range(int(start), int(end) + 1))
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d04-example") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     p2 = 0
     num_subset_pairs = 0
     for line in input_file.read_text().splitlines():

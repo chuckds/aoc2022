@@ -7,8 +7,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import utils
 
-repo_root = Path(__file__).parent.parent.parent
+
+real = utils.real_input()
 
 
 def get_start_of_packet(datastream: str, window_size: int) -> int:
@@ -37,7 +39,7 @@ def get_start_of_packet(datastream: str, window_size: int) -> int:
 
 
 def p1p2(
-    input_file: Path = repo_root / "input" / "d06-example",
+    input_file: Path = real,
 ) -> tuple[list[int], list[int]]:
     p1, p2 = ([], [])
     for ds in input_file.read_text().splitlines():

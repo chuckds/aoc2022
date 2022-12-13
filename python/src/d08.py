@@ -9,8 +9,10 @@ from typing import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 @dataclass
@@ -40,7 +42,7 @@ def viewing_distance(tree_line: Iterable[Tree]) -> int:
     return new_visibles
 
 
-def p1p2(input_file: Path = input_dir / "d08") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     p1 = 0
     rows: list[list[Tree]] = []
     cols: list[list[Tree]] = []

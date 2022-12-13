@@ -10,8 +10,10 @@ from typing import Iterable
 from pathlib import Path
 from dataclasses import dataclass
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 @dataclass
@@ -65,7 +67,7 @@ class Packet:
         return None
 
 
-def p1p2(input_file: Path = input_dir / "examples" / "d13") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     p1 = 0
     input_lines = input_file.read_text().splitlines()
     packets = [
@@ -96,5 +98,5 @@ def p1p2(input_file: Path = input_dir / "examples" / "d13") -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    print(p1p2(input_dir / "examples" / "d13"))
-    print(p1p2(input_dir / "real" / "d13"))
+    print(p1p2(utils.example_input()))
+    print(p1p2(real))

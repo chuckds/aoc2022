@@ -9,8 +9,10 @@ from collections import deque
 from typing import NamedTuple
 from pathlib import Path
 
+import utils
 
-repo_root = Path(__file__).parent.parent.parent
+
+real = utils.real_input()
 
 
 class Move(NamedTuple):
@@ -19,7 +21,7 @@ class Move(NamedTuple):
     to_stack: int
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d05-example") -> tuple[str, str]:
+def p1p2(input_file: Path = real) -> tuple[str, str]:
     p1, p2 = ("", "")
 
     stacks: dict[int, deque[str]] = {}

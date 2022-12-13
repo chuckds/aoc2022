@@ -65,7 +65,13 @@ function timeday {
 
     DAY=$1
     pushd ${REPO_ROOT}/python/src
-    python3 -m timeit "import ${DAY}; ${DAY}.p1p2('../input/real/${DAY}')"
+    python3 -m timeit "import ${DAY}; ${DAY}.p1p2(${DAY}.real)"
+    popd
+}
+
+function timedays {
+    pushd ${REPO_ROOT}/python/src
+    python3 -m utils
     popd
 }
 

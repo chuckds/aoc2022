@@ -5,11 +5,13 @@ Advent Of Code 2022 Day 1
 import bisect
 from pathlib import Path
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
-def p1p2(input_file: Path = input_dir / "examples" / "d01") -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     current_sum = 0
     sorted_elves: list[int] = []
     for line in input_file.read_text().splitlines():

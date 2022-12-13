@@ -12,8 +12,10 @@ from typing import Iterator, Callable
 from pathlib import Path
 from dataclasses import dataclass
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 @total_ordering
@@ -64,7 +66,7 @@ def shortest_route_from(
     return result
 
 
-def p1p2(input_file: Path = input_dir / "real" / "d12") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     rows = []
     destination = None
     for row_idx, line in enumerate(input_file.read_text().splitlines()):
@@ -105,5 +107,5 @@ def p1p2(input_file: Path = input_dir / "real" / "d12") -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    print(p1p2(input_dir / "examples" / "d12"))
-    print(p1p2(input_dir / "real" / "d12"))
+    print(p1p2(utils.example_input()))
+    print(p1p2(real))

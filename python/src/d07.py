@@ -8,8 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import utils
 
-repo_root = Path(__file__).parent.parent.parent
+
+real = utils.real_input()
 
 
 @dataclass
@@ -52,7 +54,7 @@ def collapse_tree_to_limit(size_limit: int, dirs: list[Dir]) -> tuple[int, int]:
     return (sum_of_dirs, smallest_dir_larger_than_limit)
 
 
-def p1p2(input_file: Path = repo_root / "input" / "d07") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     all_dirs: list[Dir] = []
     current_dir: Dir | None = None
     total_space_used = 0

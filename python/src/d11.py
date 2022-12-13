@@ -13,8 +13,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 def square(x: int) -> int:
@@ -79,7 +81,7 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
     return inspect_counts[-2] * inspect_counts[-1]
 
 
-def p1p2(input_file: Path = input_dir / "real" / "d11") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     input_lines = input_file.read_text().splitlines()
     monkeys = [
         Monkey.from_lines(input_lines[x : x + 7]) for x in range(0, len(input_lines), 7)

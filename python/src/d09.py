@@ -8,8 +8,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import NamedTuple
 
+import utils
 
-input_dir = Path(__file__).parent.parent.parent / "input"
+
+real = utils.real_input()
 
 
 class Move(NamedTuple):
@@ -46,7 +48,7 @@ class Position(NamedTuple):
         return Position(self.x + offset.x, self.y + offset.y)
 
 
-def p1p2(input_file: Path = input_dir / "d09") -> tuple[int, int]:
+def p1p2(input_file: Path = real) -> tuple[int, int]:
     moves = []
     head_trail = [Position(0, 0)]
     for line in input_file.read_text().splitlines():

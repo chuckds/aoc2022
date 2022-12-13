@@ -9,7 +9,7 @@ import operator
 from math import prod
 from functools import partial
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
@@ -19,10 +19,6 @@ import utils
 real = utils.real_input()
 
 
-def square(x: int) -> int:
-    return x**2
-
-
 WorryOp = Callable[[int], int]
 
 
@@ -30,7 +26,7 @@ def func_str_to_callable(func_str: str) -> WorryOp:
     terms = func_str.split()
     if terms[1] == "*":
         if terms[2] == "old":
-            return square
+            return lambda x: x**2
         else:
             return partial(operator.mul, int(terms[2]))
     else:  # terms[1] == "+"
@@ -46,6 +42,7 @@ class Monkey:
     if_true_monkey: int
     if_false_monkey: int
     inspect_count: int = 0
+    num_cache: dict[int, tuple[int, int]] = field(default_factory=dict)
 
     @classmethod
     def from_lines(cls, lines: list[str]) -> Monkey:
@@ -68,16 +65,21 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
             while monkey.items:
                 item_worry = monkey.items.popleft()
                 monkey.inspect_count += 1
-                worry = monkey.operation(item_worry)
-                if div_3:
-                    worry = worry // 3
+                cache_info = monkey.num_cache.get(item_worry, None)
+                if cache_info is None:
+                    worry = monkey.operation(item_worry)
+                    if div_3:
+                        worry = worry // 3
+                    else:
+                        worry = worry % common_mod
+                    dest_monkey = monkey.if_true_monkey if worry % monkey.test_div_by == 0 else monkey.if_false_monkey
+                    monkey.num_cache[item_worry] = (dest_monkey, worry)
                 else:
-                    worry = worry % common_mod
-                if worry % monkey.test_div_by == 0:
-                    monkey_from_num[monkey.if_true_monkey].items.append(worry)
-                else:
-                    monkey_from_num[monkey.if_false_monkey].items.append(worry)
+                    dest_monkey, worry = cache_info
+
+                monkey_from_num[dest_monkey].items.append(worry)
     inspect_counts = sorted(m.inspect_count for m in monkeys)
+
     return inspect_counts[-2] * inspect_counts[-1]
 
 
@@ -93,7 +95,13 @@ def p1p2(input_file: Path = real) -> tuple[int, int]:
     for m, init_items in zip(monkeys, init_states):
         m.items = init_items
         m.inspect_count = 0
+        m.num_cache = {}
 
     p2 = run_rounds(monkeys, div_3=False, rounds=10_000)
 
     return (p1, p2)
+
+
+if __name__ == "__main__":
+    print(p1p2(utils.example_input()))
+    print(p1p2(real))

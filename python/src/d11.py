@@ -73,7 +73,11 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
                         worry = worry // 3
                     else:
                         worry = worry % common_mod
-                    dest_monkey = monkey.if_true_monkey if worry % monkey.test_div_by == 0 else monkey.if_false_monkey
+                    dest_monkey = (
+                        monkey.if_true_monkey
+                        if worry % monkey.test_div_by == 0
+                        else monkey.if_false_monkey
+                    )
                     monkey.num_cache[item_worry] = (dest_monkey, worry)
                 else:
                     dest_monkey, worry = cache_info
@@ -107,7 +111,11 @@ def per_items(monkeys: list[Monkey]) -> None:
                 if next_state is None:
                     this_monkey = monkey_from_num[state.monkey]
                     next_worry = this_monkey.operation(state.worry) % common_mod
-                    next_monkey = this_monkey.if_true_monkey if next_worry % this_monkey.test_div_by == 0 else this_monkey.if_false_monkey
+                    next_monkey = (
+                        this_monkey.if_true_monkey
+                        if next_worry % this_monkey.test_div_by == 0
+                        else this_monkey.if_false_monkey
+                    )
                     next_state = ItemState(next_worry, next_monkey)
                     worry_map[state] = next_state
                 else:
@@ -123,7 +131,9 @@ def per_items(monkeys: list[Monkey]) -> None:
                     this_round_inspects = [0] * len(monkeys)
                 elif looped or in_cache:
                     # We hit the cache but aren't at the end of a round
-                    print(f"{train_id} hit cycle ({looped} {in_cache}) after {len(per_round_inspects)} rounds but not at round end")
+                    print(
+                        f"{train_id} hit cycle ({looped} {in_cache}) after {len(per_round_inspects)} rounds but not at round end"
+                    )
 
                 state = next_state
             print(f"{train_id} {len(per_round_inspects)=} {len(worry_map)}")
@@ -150,5 +160,5 @@ def p1p2(input_file: Path = real) -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    #print(p1p2(utils.example_input()))
+    # print(p1p2(utils.example_input()))
     print(p1p2(real))

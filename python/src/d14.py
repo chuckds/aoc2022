@@ -29,8 +29,8 @@ class Line(NamedTuple):
     end: Point
 
     def __iter__(self) -> Iterator[Point]:
-        xdir = 1 if self.end.x >= self.st.x else - 1
-        ydir = 1 if self.end.y >= self.st.y else - 1
+        xdir = 1 if self.end.x >= self.st.x else -1
+        ydir = 1 if self.end.y >= self.st.y else -1
         for x in range(self.st.x, self.end.x + xdir, xdir):
             for y in range(self.st.y, self.end.y + ydir, ydir):
                 yield Point(x, y)

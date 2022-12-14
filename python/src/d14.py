@@ -5,6 +5,7 @@ Advent Of Code 2022 d14
 from __future__ import annotations
 
 
+from shutil import get_terminal_size
 from pathlib import Path
 from typing import NamedTuple, Iterator
 
@@ -20,6 +21,9 @@ class Point(NamedTuple):
             yield Point(self.x + x_delt, self.y + 1)
 
 
+SAND_POINT = Point(500, 0)
+
+
 class Line(NamedTuple):
     st: Point
     end: Point
@@ -32,11 +36,32 @@ class Line(NamedTuple):
                 yield Point(x, y)
 
 
-SAND_POINT = Point(500, 0)
+def print_space(floor: int, blocked: set[Point], rocks: set[Point]) -> None:
+    term_width, _ = get_terminal_size()
+    print(f"{term_width=}")
+    term_width -= 5
+    min_x = min(p.x for p in blocked)
+    max_x = max(p.x for p in blocked)
+    width = max_x + 5 - min_x
+    disp_width = min(term_width, width)
+    froms = range(min_x - 2, max_x + 3, disp_width)
+    for st_x in froms:
+        for y in range(0, floor):
+            for x in range(st_x, st_x + disp_width):
+                p = Point(x, y)
+                c = "."
+                if p in rocks:
+                    c = "#"
+                elif p in blocked:
+                    c = "o"
+                print(c, end="")
+            print()
+        print("continuing to right")
+    print("#" * (max_x - min_x + 5))
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
-    p1, p2 = (0, 0)
+    p1 = 0
     blocked: set[Point] = set()
     max_rock_y = 0
     for line in input_file.read_text().splitlines():

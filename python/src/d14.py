@@ -5,7 +5,6 @@ Advent Of Code 2022 d14
 from __future__ import annotations
 
 
-from shutil import get_terminal_size
 from pathlib import Path
 from typing import NamedTuple, Iterator
 
@@ -36,32 +35,7 @@ class Line(NamedTuple):
                 yield Point(x, y)
 
 
-def print_space(floor: int, blocked: set[Point], rocks: set[Point]) -> None:
-    term_width, _ = get_terminal_size()
-    print(f"{term_width=}")
-    term_width -= 5
-    min_x = min(p.x for p in blocked)
-    max_x = max(p.x for p in blocked)
-    width = max_x + 5 - min_x
-    disp_width = min(term_width, width)
-    froms = range(min_x - 2, max_x + 3, disp_width)
-    for st_x in froms:
-        for y in range(0, floor):
-            for x in range(st_x, st_x + disp_width):
-                p = Point(x, y)
-                c = "."
-                if p in rocks:
-                    c = "#"
-                elif p in blocked:
-                    c = "o"
-                print(c, end="")
-            print()
-        print("continuing to right")
-    print("#" * (max_x - min_x + 5))
-
-
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
-    p1 = 0
     blocked: set[Point] = set()
     max_rock_y = 0
     for line in input_file.read_text().splitlines():
@@ -74,25 +48,34 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
             blocked.update(Line(st, end))
             st = end
 
-    floor = max_rock_y + 2
+    rocks = blocked.copy()
     sand_units = 1
     sand_pos = SAND_POINT
-    while True:
+    while sand_pos.y < max_rock_y:
         for next_sand in sand_pos.next_sand_posn():
-            if next_sand.y < floor and next_sand not in blocked:
+            if next_sand not in blocked:
                 sand_pos = next_sand
                 break
-        else:  # No break
-            if sand_pos == SAND_POINT:
-                break
+        else:  # No break == nowhere to go, so the sand comes to a rest and new sand flows
             blocked.add(sand_pos)
             sand_units += 1
             sand_pos = SAND_POINT
 
-        if p1 == 0 and sand_pos.y >= max_rock_y:  # Sand has fallen past last rocks
-            p1 = sand_units - 1
+    # p2 every reachable point is going to get filled with sand
+    floor = max_rock_y + 2
+    to_visit = set([SAND_POINT])
+    visited = set()
+    while to_visit:
+        point_reached = to_visit.pop()
+        visited.add(point_reached)
+        if point_reached.y < floor - 1:
+            for point in point_reached.next_sand_posn():
+                if point not in rocks:
+                    # Can reach this point
+                    if point not in visited:
+                        to_visit.add(point)
 
-    return (p1, sand_units)
+    return (sand_units - 1, len(visited))
 
 
 if __name__ == "__main__":

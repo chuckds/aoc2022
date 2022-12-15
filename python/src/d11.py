@@ -1,5 +1,5 @@
 """
-Advent Of Code 2022 d11
+Advent Of Code 2022 Day 11
 """
 
 from __future__ import annotations
@@ -14,9 +14,6 @@ from pathlib import Path
 from typing import Callable, NamedTuple
 
 import utils
-
-
-real = utils.real_input()
 
 
 WorryOp = Callable[[int], int]
@@ -139,7 +136,7 @@ def per_items(monkeys: list[Monkey]) -> None:
             print(f"{train_id} {len(per_round_inspects)=} {len(worry_map)}")
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     input_lines = input_file.read_text().splitlines()
     monkeys = [
         Monkey.from_lines(input_lines[x : x + 7]) for x in range(0, len(input_lines), 7)
@@ -160,5 +157,5 @@ def p1p2(input_file: Path = real) -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    # print(p1p2(utils.example_input()))
-    print(p1p2(real))
+    print(p1p2(utils.example_input()))
+    print(p1p2(utils.real_input()))

@@ -11,9 +11,6 @@ from typing import NamedTuple
 import utils
 
 
-real = utils.real_input()
-
-
 class Move(NamedTuple):
     direction: str
     length: int
@@ -48,7 +45,7 @@ class Position(NamedTuple):
         return Position(self.x + offset.x, self.y + offset.y)
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     moves = []
     head_trail = [Position(0, 0)]
     for line in input_file.read_text().splitlines():

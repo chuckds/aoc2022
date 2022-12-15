@@ -10,9 +10,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 CRT_WIDTH = 40
 
 
@@ -27,7 +24,7 @@ def draw_pixel(cycle: int, reg_x: int) -> str:
     return result
 
 
-def p1p2(input_file: Path = real) -> tuple[int, str]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, str]:
     p1, p2 = (0, "")
     reg_x = 1
     cycle_count = 1

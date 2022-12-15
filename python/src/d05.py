@@ -12,16 +12,13 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 class Move(NamedTuple):
     num_move: int
     from_stack: int
     to_stack: int
 
 
-def p1p2(input_file: Path = real) -> tuple[str, str]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[str, str]:
     p1, p2 = ("", "")
 
     stacks: dict[int, deque[str]] = {}

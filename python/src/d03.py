@@ -1,5 +1,5 @@
 """
-Advent Of Code 2022 Day X
+Advent Of Code 2022 Day 3
 """
 
 from __future__ import annotations
@@ -10,15 +10,12 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 def item_to_prio(item: str) -> int:
     offset = 96 if item.islower() else 38
     return ord(item) - offset
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     p1, p2 = (0, 0)
     group_unique_items: Counter[str] = Counter()
     for index, line in enumerate(input_file.read_text().splitlines()):

@@ -1,5 +1,5 @@
 """
-Advent Of Code 2022 d14
+Advent Of Code 2022 Day 14
 """
 
 from __future__ import annotations

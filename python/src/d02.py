@@ -10,9 +10,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 def score_that_beats(score: int) -> int:
     return (score % 3) + 1
 
@@ -63,7 +60,7 @@ move_from_opp_code = {m.opponent_code: m for m in moves}
 move_from_your_code = {m.your_code: m for m in moves}
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     inputs = [line.split() for line in input_file.read_text().splitlines()]
 
     p1, p2 = (0, 0)

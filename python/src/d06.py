@@ -10,9 +10,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 def get_start_of_packet(datastream: str, window_size: int) -> int:
     result = 0
     from_char = 0
@@ -38,9 +35,7 @@ def get_start_of_packet(datastream: str, window_size: int) -> int:
     return result
 
 
-def p1p2(
-    input_file: Path = real,
-) -> tuple[list[int], list[int]]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[list[int], list[int]]:
     p1, p2 = ([], [])
     for ds in input_file.read_text().splitlines():
         p1.append(get_start_of_packet(ds, window_size=4))

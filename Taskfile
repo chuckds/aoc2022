@@ -37,7 +37,7 @@ function newday {
 
     # Python
     cp ${REPO_ROOT}/python/src/template.py ${REPO_ROOT}/python/src/${NEW_DAY}.py
-    sed -i '' "s/XXX/${NEW_DAY}/" ${REPO_ROOT}/python/src/${NEW_DAY}.py
+    sed -i '' "s/XXX/${RAW_DAY}/" ${REPO_ROOT}/python/src/${NEW_DAY}.py
     git add ${REPO_ROOT}/python/src/${NEW_DAY}.py
     code ${REPO_ROOT}/python/src/${NEW_DAY}.py
 
@@ -65,7 +65,7 @@ function timeday {
 
     DAY=$1
     pushd ${REPO_ROOT}/python/src
-    python3 -m timeit "import ${DAY}; ${DAY}.p1p2(${DAY}.real)"
+    python3 -m timeit "import ${DAY}; ${DAY}.p1p2(${DAY}.utils.real_input('${DAY}'))"
     popd
 }
 

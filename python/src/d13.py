@@ -1,5 +1,5 @@
 """
-Advent Of Code 2022 d13
+Advent Of Code 2022 Day 13
 """
 
 from __future__ import annotations
@@ -11,9 +11,6 @@ from pathlib import Path
 from dataclasses import dataclass
 
 import utils
-
-
-real = utils.real_input()
 
 
 @dataclass
@@ -67,7 +64,7 @@ class Packet:
         return None
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     p1 = 0
     input_lines = input_file.read_text().splitlines()
     packets = [
@@ -99,4 +96,4 @@ def p1p2(input_file: Path = real) -> tuple[int, int]:
 
 if __name__ == "__main__":
     print(p1p2(utils.example_input()))
-    print(p1p2(real))
+    print(p1p2(utils.real_input()))

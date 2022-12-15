@@ -15,9 +15,6 @@ from dataclasses import dataclass
 import utils
 
 
-real = utils.real_input()
-
-
 @total_ordering
 @dataclass
 class GridLocation:
@@ -66,7 +63,7 @@ def shortest_route_from(
     return result
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     rows = []
     destination = None
     for row_idx, line in enumerate(input_file.read_text().splitlines()):
@@ -108,4 +105,4 @@ def p1p2(input_file: Path = real) -> tuple[int, int]:
 
 if __name__ == "__main__":
     print(p1p2(utils.example_input()))
-    print(p1p2(real))
+    print(p1p2(utils.real_input()))

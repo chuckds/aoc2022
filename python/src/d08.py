@@ -12,9 +12,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 @dataclass
 class Tree:
     height: int
@@ -42,7 +39,7 @@ def viewing_distance(tree_line: Iterable[Tree]) -> int:
     return new_visibles
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     p1 = 0
     rows: list[list[Tree]] = []
     cols: list[list[Tree]] = []

@@ -11,9 +11,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 @dataclass
 class Dir:
     name: str
@@ -54,7 +51,7 @@ def collapse_tree_to_limit(size_limit: int, dirs: list[Dir]) -> tuple[int, int]:
     return (sum_of_dirs, smallest_dir_larger_than_limit)
 
 
-def p1p2(input_file: Path = real) -> tuple[int, int]:
+def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     all_dirs: list[Dir] = []
     current_dir: Dir | None = None
     total_space_used = 0

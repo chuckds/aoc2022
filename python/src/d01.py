@@ -8,9 +8,6 @@ from pathlib import Path
 import utils
 
 
-real = utils.real_input()
-
-
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     current_sum = 0
     sorted_elves: list[int] = []

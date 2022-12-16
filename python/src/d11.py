@@ -8,7 +8,7 @@ from __future__ import annotations
 import operator
 from math import prod
 from functools import partial
-from collections import deque
+from collections import deque, Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, NamedTuple
@@ -57,7 +57,6 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
     monkey_from_num: dict[int, Monkey] = {m.number: m for m in monkeys}
 
     common_mod = prod([m.test_div_by for m in monkeys])
-    print(f"{common_mod=}")
     for _ in range(rounds):
         for monkey in monkeys:
             while monkey.items:
@@ -81,7 +80,7 @@ def run_rounds(monkeys: list[Monkey], div_3: bool = False, rounds: int = 10_000)
 
                 monkey_from_num[dest_monkey].items.append(worry)
     inspect_counts = sorted(m.inspect_count for m in monkeys)
-
+    print(inspect_counts)
     return inspect_counts[-2] * inspect_counts[-1]
 
 
@@ -90,50 +89,75 @@ class ItemState(NamedTuple):
     monkey: int
 
 
-def per_items(monkeys: list[Monkey]) -> None:
+def process_item(worry: int, monkey_num: int, num_monkeys: int,
+                 common_mod: int, monkey_from_num: dict[int, Monkey],
+                 worry_map: dict[ItemState, tuple[ItemState, int, int, ItemState]],
+                 num_rounds: int) -> None:
+    train_id = ItemState(worry, monkey_num)
+    state = train_id
+    per_round_inspects = []
+    this_round_inspects = [0] * num_monkeys
+    looped = False
+    num_throws = 0
+    while not looped:
+        num_throws += 1
+        this_round_inspects[state.monkey] += 1
+        next_state_num = worry_map.get(state, None)
+        throw_first_seen = None
+        if next_state_num is None:
+            this_monkey = monkey_from_num[state.monkey]
+            next_worry = this_monkey.operation(state.worry) % common_mod
+            next_monkey = (
+                this_monkey.if_true_monkey
+                if next_worry % this_monkey.test_div_by == 0
+                else this_monkey.if_false_monkey
+            )
+            next_state = ItemState(next_worry, next_monkey)
+        else:
+            next_state, throw_first_seen, first_round_seen, train_to_see = next_state_num
+            if train_to_see == train_id:
+                looped = True
+                # This appears to always happen on the last throw of a round - helpful?
+        worry_map[state] = (next_state, num_throws, len(per_round_inspects), train_id)
+
+        if next_state.monkey < state.monkey:
+            # The next step will be on the next round
+            per_round_inspects.append(this_round_inspects)
+            this_round_inspects = this_round_inspects[:]  # cumulative
+        else:
+            assert not looped
+
+        state = next_state
+
+    # Loop hit
+    head_round_len = first_round_seen + 1
+    head_inspect_counts = per_round_inspects[head_round_len - 1]
+    loop_round_len = len(per_round_inspects) - head_round_len
+    loop_inspect_counts = []
+    print(f"{train_id} hits loop after {throw_first_seen} throws ({head_round_len} rounds) "
+          f"head. Loop length {num_throws - throw_first_seen} throws ({loop_round_len} rounds). ")
+    for inspect_counts in per_round_inspects[head_round_len - 1:]:
+        loop_inspect_counts.append(
+            [loop_count - head_count for head_count, loop_count
+             in zip(head_inspect_counts, inspect_counts)])
+    loop_count, into_loop = divmod(num_rounds - head_round_len, loop_round_len)
+    print(f"{loop_count=} {into_loop=} {len(loop_inspect_counts)=} {loop_round_len}")
+    # head_inspect_counts + loop_inspect_counts[-1] * loop_count + loop_inspect_counts[into_loop]
+    return [h + l + loop_count * l2 for h, l, l2 in zip(head_inspect_counts, loop_inspect_counts[into_loop], loop_inspect_counts[-1])]
+
+
+def per_items(monkeys: list[Monkey]) -> int:
     monkey_from_num: dict[int, Monkey] = {m.number: m for m in monkeys}
     common_mod = prod([m.test_div_by for m in monkeys])
-    worry_map: dict[ItemState, ItemState] = {}
+    worry_map: dict[ItemState, tuple[ItemState, int, int, ItemState]] = {}
+    inspect_counts = [0] * len(monkeys)
     for monkey in monkeys:
-        for worry in monkey.items:
-            train_id = ItemState(worry, monkey.number)
-            state = train_id
-            per_round_inspects = []
-            this_round_inspects = [0] * len(monkeys)
-            looped = False
-            in_cache = False
-            while True:
-                this_round_inspects[state.monkey] += 1
-                next_state = worry_map.get(state, None)
-                if next_state is None:
-                    this_monkey = monkey_from_num[state.monkey]
-                    next_worry = this_monkey.operation(state.worry) % common_mod
-                    next_monkey = (
-                        this_monkey.if_true_monkey
-                        if next_worry % this_monkey.test_div_by == 0
-                        else this_monkey.if_false_monkey
-                    )
-                    next_state = ItemState(next_worry, next_monkey)
-                    worry_map[state] = next_state
-                else:
-                    in_cache = True
-
-                looped = looped or next_state == train_id
-                if next_state.monkey < state.monkey:
-                    # The next step will be on the next round
-                    per_round_inspects.append(this_round_inspects)
-                    if looped or in_cache:
-                        # End of round after looping so break
-                        break
-                    this_round_inspects = [0] * len(monkeys)
-                elif looped or in_cache:
-                    # We hit the cache but aren't at the end of a round
-                    print(
-                        f"{train_id} hit cycle ({looped} {in_cache}) after {len(per_round_inspects)} rounds but not at round end"
-                    )
-
-                state = next_state
-            print(f"{train_id} {len(per_round_inspects)=} {len(worry_map)}")
+        for worry, count in Counter(monkey.items).items():
+            inspect_count_add = process_item(worry, monkey.number, len(monkeys),
+                                             common_mod, monkey_from_num, worry_map, 10_000)
+            inspect_counts = [old + count * new for old, new in zip(inspect_counts, inspect_count_add)]
+    inspect_counts = sorted(inspect_counts)
+    return inspect_counts[-2] * inspect_counts[-1]
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
@@ -142,7 +166,7 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
         Monkey.from_lines(input_lines[x : x + 7]) for x in range(0, len(input_lines), 7)
     ]
     init_states = [m.items.copy() for m in monkeys]
-    per_items(monkeys)
+    print(f"{per_items(monkeys)=}")
     p1 = run_rounds(monkeys, div_3=True, rounds=20)
 
     # Reset monkeys for p2
@@ -152,10 +176,9 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
         m.num_cache = {}
 
     p2 = run_rounds(monkeys, div_3=False, rounds=10_000)
-
     return (p1, p2)
 
 
 if __name__ == "__main__":
-    print(p1p2(utils.example_input()))
+    #print(p1p2(utils.example_input()))
     print(p1p2(utils.real_input()))

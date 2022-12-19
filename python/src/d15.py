@@ -12,7 +12,9 @@ from typing import NamedTuple
 import utils
 
 
-input_line_re = re.compile(r"[^=]*=(?P<sensx>-?[0-9]+)[^=]*=(?P<sensy>-?[0-9]+)[^=]*=(?P<beacx>-?[0-9]+)[^=]*=(?P<beacy>-?[0-9]+)")
+input_line_re = re.compile(
+    r"[^=]*=(?P<sensx>-?[0-9]+)[^=]*=(?P<sensy>-?[0-9]+)[^=]*=(?P<beacx>-?[0-9]+)[^=]*=(?P<beacy>-?[0-9]+)"
+)
 
 
 class Point(NamedTuple):
@@ -21,13 +23,6 @@ class Point(NamedTuple):
 
     def taxicab_dist(self, other: Point) -> int:
         return abs(self.x - other.x) + abs(self.y - other.y)
-
-
-def detection_slice_r(detection_size: int, from_centre: int, centre_x: int) -> range:
-    # from_centre   start x .  len x
-    # 0         centre_x - detection_size    detection_size * 2 + 1
-    # 1
-    return range(centre_x - detection_size + from_centre, centre_x + detection_size - from_centre + 1)
 
 
 def len_ranges(ranges: list[range]) -> int:
@@ -45,11 +40,13 @@ def p1(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
     range_block_on_target: list[range] = []
     beacons_on_target_row: set[Point] = set()
     for sensor, beacon, detection_size in sensor_beacons:
-        distance_from_target = abs(sensor.y - target_row)
         if beacon.y == target_row:
             beacons_on_target_row.add(beacon)
-        if detection_size >= distance_from_target:
-            range_block_on_target.append(detection_slice_r(detection_size, distance_from_target, sensor.x))
+        sensor_pen = detection_size - abs(sensor.y - target_row)
+        if sensor_pen >= 0:
+            range_block_on_target.append(
+                range(sensor.x - sensor_pen, sensor.x + sensor_pen + 1)
+            )
 
     return len_ranges(range_block_on_target) - len(beacons_on_target_row)
 
@@ -58,12 +55,16 @@ def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
     dim_max = 20 if len(sensor_beacons) < 15 else 4_000_000
 
     row_ranges: dict[int, list[range]] = {}
-    for sensor, beacon, detection_size in sensor_beacons:
+    for sensor, _, detection_size in sensor_beacons:
         if sensor.x + detection_size >= 0 and sensor.x - detection_size <= dim_max:
-            for row in range(max(0, sensor.y - detection_size), min(dim_max, sensor.y + detection_size) + 1):
-                distance_from_target = abs(sensor.y - row)
-                blocked_range = detection_slice_r(detection_size, distance_from_target, sensor.x)
-                row_ranges.setdefault(row, []).append(blocked_range)
+            for row in range(
+                max(0, sensor.y - detection_size),
+                min(dim_max, sensor.y + detection_size) + 1,
+            ):
+                sensor_pen = detection_size - abs(sensor.y - row)
+                row_ranges.setdefault(row, []).append(
+                    range(sensor.x - sensor_pen, sensor.x + sensor_pen + 1)
+                )
 
     x_val = -10
     for row, blocked_ranges in row_ranges.items():
@@ -85,13 +86,11 @@ def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     sensor_beacons: list[tuple[Point, Point, int]] = []
-    beacons: set[Point] = set()
     for line in input_file.read_text().splitlines():
         m = input_line_re.match(line)
         if m:
             sensor = Point(int(m.group("sensx")), int(m.group("sensy")))
             beacon = Point(int(m.group("beacx")), int(m.group("beacy")))
-            beacons.add(beacon)
             sensor_beacons.append((sensor, beacon, sensor.taxicab_dist(beacon)))
 
     return (p1(sensor_beacons), p2(sensor_beacons))

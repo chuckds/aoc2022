@@ -78,10 +78,13 @@ class ItemState(NamedTuple):
     monkey: int
 
 
-def process_item(start_state: ItemState,
-                 common_mod: int, num_to_monkey: dict[int, Monkey],
-                 worry_map: dict[ItemState, tuple[ItemState, int, ItemState]],
-                 num_rounds: int) -> list[int]:
+def process_item(
+    start_state: ItemState,
+    common_mod: int,
+    num_to_monkey: dict[int, Monkey],
+    worry_map: dict[ItemState, tuple[ItemState, int, ItemState]],
+    num_rounds: int,
+) -> list[int]:
     state = start_state
     per_round_inspects: list[list[int]] = []
     this_round_inspects = [0] * len(num_to_monkey)
@@ -94,11 +97,10 @@ def process_item(start_state: ItemState,
         if next_state_num is None:
             this_monkey = num_to_monkey[state.monkey]
             next_worry = this_monkey.operation(state.worry) % common_mod
-            next_state = ItemState(
-                next_worry, this_monkey.next_monkey(next_worry))
+            next_state = ItemState(next_worry, this_monkey.next_monkey(next_worry))
         else:
             next_state, first_round_seen, start_state_seen_by = next_state_num
-            looped = (start_state_seen_by == start_state)
+            looped = start_state_seen_by == start_state
 
         worry_map[state] = (next_state, len(per_round_inspects), start_state)
 
@@ -126,11 +128,20 @@ def process_item(start_state: ItemState,
     #  - the inspect count increase from a partial loop
     #  - the inspect count increase from the rounds before the loop
     # The sum of the last two is simply the inspect counts partway through the loop.
-    inspect_count_over_loop = [end - start for end, start in zip(per_round_inspects[-1], per_round_inspects[head_round_len - 1])]
+    inspect_count_over_loop = [
+        end - start
+        for end, start in zip(
+            per_round_inspects[-1], per_round_inspects[head_round_len - 1]
+        )
+    ]
     partial_loop_inspect_counts = per_round_inspects[head_round_len + into_loop - 1]
 
-    return [part_loop + loop_count * full_loop
-            for part_loop, full_loop in zip(partial_loop_inspect_counts, inspect_count_over_loop)]
+    return [
+        part_loop + loop_count * full_loop
+        for part_loop, full_loop in zip(
+            partial_loop_inspect_counts, inspect_count_over_loop
+        )
+    ]
 
 
 def process_each_item(num_to_monkey: dict[int, Monkey], rounds: int) -> int:
@@ -141,17 +152,26 @@ def process_each_item(num_to_monkey: dict[int, Monkey], rounds: int) -> int:
     for monkey in num_to_monkey.values():
         # Only calculate unique values - multiple the inspect counts by count
         for worry, count in Counter(monkey.items).items():
-            item_inspect_counts = process_item(ItemState(worry, monkey.number),
-                                               common_mod, num_to_monkey, worry_map, rounds)
-            inspect_counts = [old + count * new for old, new in zip(inspect_counts, item_inspect_counts)]
+            item_inspect_counts = process_item(
+                ItemState(worry, monkey.number),
+                common_mod,
+                num_to_monkey,
+                worry_map,
+                rounds,
+            )
+            inspect_counts = [
+                old + count * new
+                for old, new in zip(inspect_counts, item_inspect_counts)
+            ]
     inspect_counts = sorted(inspect_counts)
     return inspect_counts[-2] * inspect_counts[-1]
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     input_lines = input_file.read_text().splitlines()
-    monkeys = [Monkey.from_lines(input_lines[x : x + 7])
-               for x in range(0, len(input_lines), 7)]
+    monkeys = [
+        Monkey.from_lines(input_lines[x : x + 7]) for x in range(0, len(input_lines), 7)
+    ]
     num_to_monkey: dict[int, Monkey] = {m.number: m for m in monkeys}
 
     # Run p2 before p1 since p1 alters init state

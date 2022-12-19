@@ -80,9 +80,14 @@ def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
                 else:
                     y_intercept = point_on_edge_y + sensor.x
                 this_edge = DetectionEdgeLine(y_intercept, no_beacons_below, slope_down)
-                detection_edges.setdefault(this_edge, []).append((sensor, detection_size))
+                detection_edges.setdefault(this_edge, []).append(
+                    (sensor, detection_size)
+                )
 
-                if DetectionEdgeLine(y_intercept, not no_beacons_below, slope_down) in detection_edges:
+                if (
+                    DetectionEdgeLine(y_intercept, not no_beacons_below, slope_down)
+                    in detection_edges
+                ):
                     # The opposite partner of this edge is present - which means's there is a line where
                     # beacons could be with areas where they can't above and below
                     edge_pairs.setdefault(slope_down, set()).add(y_intercept)
@@ -92,8 +97,10 @@ def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
     candidate_points: set[Point] = set()
     for slope_down_intercept in edge_pairs.get(True, set()):
         for slope_up_intercept in edge_pairs.get(False, set()):
-            intersec = Point((slope_up_intercept - slope_down_intercept) // 2,
-                             (slope_up_intercept + slope_down_intercept) // 2)
+            intersec = Point(
+                (slope_up_intercept - slope_down_intercept) // 2,
+                (slope_up_intercept + slope_down_intercept) // 2,
+            )
 
             # Check that this intersection point is on the edge of each of the 4 sensor locations
             # So far nothing is bounding the lines of the detection zone boarder
@@ -101,17 +108,37 @@ def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
             on_edges = True
             for no_beacons_below in (False, True):
                 for slope_down in (False, True):
-                    y_intercept = slope_down_intercept if slope_down else slope_up_intercept
+                    y_intercept = (
+                        slope_down_intercept if slope_down else slope_up_intercept
+                    )
                     on_an_edge = False
-                    for sensor, detection_size in detection_edges[DetectionEdgeLine(y_intercept, no_beacons_below, slope_down)]:
+                    for sensor, detection_size in detection_edges[
+                        DetectionEdgeLine(y_intercept, no_beacons_below, slope_down)
+                    ]:
                         if no_beacons_below:
-                            y_ok = (sensor.y - (detection_size + 1)) <= intersec.y <= sensor.y
+                            y_ok = (
+                                (sensor.y - (detection_size + 1))
+                                <= intersec.y
+                                <= sensor.y
+                            )
                         else:
-                            y_ok = sensor.y <= intersec.y <= sensor.y + (detection_size + 1)
+                            y_ok = (
+                                sensor.y
+                                <= intersec.y
+                                <= sensor.y + (detection_size + 1)
+                            )
                         if no_beacons_below == slope_down:
-                            x_ok = sensor.x <= intersec.x <= sensor.x + (detection_size + 1)
+                            x_ok = (
+                                sensor.x
+                                <= intersec.x
+                                <= sensor.x + (detection_size + 1)
+                            )
                         else:
-                            x_ok = (sensor.x - (detection_size + 1)) <= intersec.x <= sensor.x
+                            x_ok = (
+                                (sensor.x - (detection_size + 1))
+                                <= intersec.x
+                                <= sensor.x
+                            )
                         on_an_edge = on_an_edge or (x_ok and y_ok)
                     on_edges = on_edges and on_an_edge
             if on_edges:

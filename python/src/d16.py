@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from collections import deque
-from typing import NamedTuple
 from dataclasses import dataclass, field
 
 import utils
@@ -18,21 +17,24 @@ class Valve:
     name: str
     flow_rate: int
     connected_valve_strs: list[str]
-    connected_valves: list[Valve] | None = None
-    time_to_valve: dict[str, int] | None = None
+    connected_valves: list[Valve] = field(default_factory=list)
+    time_to_valve: dict[str, int] = field(default_factory=dict)
 
 
-def max_flow(at_valve: Valve, time_left: int, valves_to_open: set[str], release_rate: int, pressure_released: int) -> int:
-    if time_left == 0 or not valves_to_open:
+def max_flow(at_valve: Valve, time_left: int, valves_to_open: set[str], release_rate: int, pressure_released: int, valves: dict[str, Valve]) -> int:
+    times = [(v_str, at_valve.time_to_valve[v_str] + 1)
+             for v_str in valves_to_open
+             if at_valve.time_to_valve[v_str] + 1 <= time_left]
+    if not times:
         return pressure_released + release_rate * time_left
     else:
-        max_flows = [max_flow(next_valve, time_left - 1, valves_to_open, release_rate, pressure_released + release_rate) for next_valve in at_valve.connected_valves]
-
-        # Now 'visit' opening the valve
-        if at_valve.name in valves_to_open:
-            valves_to_open = valves_to_open.copy()
-            valves_to_open.remove(at_valve.name)
-            max_flows.append(max_flow(at_valve, time_left - 1, valves_to_open, release_rate + at_valve, pressure_released + release_rate))
+        max_flows = []
+        for valve_to_open_str, time_to_get_there in times:
+            valve_to_open = valves[valve_to_open_str]
+            next_valves_to_open = valves_to_open.copy()
+            next_valves_to_open.remove(valve_to_open_str)
+            max_flows.append(max_flow(valve_to_open, time_left - time_to_get_there, next_valves_to_open,
+                                      release_rate + valve_to_open.flow_rate, pressure_released + time_to_get_there * release_rate, valves))
         return max(max_flows)
 
 
@@ -49,11 +51,6 @@ def compute_times_from_valve(start_valve: Valve) -> None:
     start_valve.time_to_valve = visited
 
 
-def compute_times(valves: dict[str, Valve]):
-    for valve in valves.values():
-        compute_times_from_valve(valve)
-
-
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     p1, p2 = (0, 0)
     valves: dict[str, Valve] = {}
@@ -63,34 +60,11 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
 
     for v in valves.values():
         v.connected_valves = [valves[valve_str] for valve_str in v.connected_valve_strs]
-    compute_times(valves)
 
-    valves_to_open = set(v.name for v in valves.values() if v.flow_rate > 0)
-    to_visit: list[tuple[Valve, int, int, int, set[str]]] = [(valves["AA"], 0, 0, 30, valves_to_open)]
-    max_p_release = -1
-    visited: set[tuple[str, frozenset]] = set()
-    while to_visit:
-        visiting, pressure_released, release_rate, time_left, valves_to_open = to_visit.pop()
-        fs_to_open = frozenset(valves_to_open)
-        visited.add((visiting.name, fs_to_open, time_left, pressure_released))
-        if time_left == 0 or not valves_to_open:
-            # No more valves to open so no point spinning around wasting time
-            max_p_release = max(max_p_release, pressure_released + release_rate * time_left)
-        else:
-            # Visit neghbours without opening valve
-            for next_valve in visiting.connected_valves:
-                if (next_valve.name, fs_to_open, time_left - 1, pressure_released + release_rate) not in visited:
-                    to_visit.append((next_valve, pressure_released + release_rate, release_rate, time_left - 1, valves_to_open.copy()))
+    for valve in valves.values():
+        compute_times_from_valve(valve)
 
-            # Now 'visit' opening the valve
-            if visiting.name in valves_to_open:
-                valves_to_open.remove(visiting.name)
-                if (visiting.name, frozenset(valves_to_open), time_left - 1, pressure_released + release_rate) not in visited:
-                    to_visit.append((visiting, pressure_released + release_rate, release_rate + visiting.flow_rate,
-                                     time_left - 1, valves_to_open.copy()))
-            #to_visit.sort(key=lambda x: x[1] + x[2] * x[3])
-
-    p1 = max_p_release
+    p1 = max_flow(valves["AA"], 30, set(v.name for v in valves.values() if v.flow_rate), 0, 0, valves)
     return (p1, p2)
 
 

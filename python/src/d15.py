@@ -51,37 +51,84 @@ def p1(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
     return len_ranges(range_block_on_target) - len(beacons_on_target_row)
 
 
+class DetectionEdgeLine(NamedTuple):
+    y_intercept: int
+    no_beacons_below: bool
+    slope_down: bool
+
+
 def p2(sensor_beacons: list[tuple[Point, Point, int]]) -> int:
-    dim_max = 20 if len(sensor_beacons) < 15 else 4_000_000
+    """
+    If there is only one point where the beacon can be then it must be just
+    on the edge of the detection zone of 4 sesors.
+    Note: This ignores the x and y limits provided by the problem...
+    """
 
-    row_ranges: dict[int, list[range]] = {}
+    # For each sensor compute the y intercept of each of the 4 lines that
+    # define the boundary *just* outside its detection zone
+    edge_pairs: dict[bool, set[int]] = {}
+    detection_edges: dict[DetectionEdgeLine, list[tuple[Point, int]]] = {}
     for sensor, _, detection_size in sensor_beacons:
-        if sensor.x + detection_size >= 0 and sensor.x - detection_size <= dim_max:
-            for row in range(
-                max(0, sensor.y - detection_size),
-                min(dim_max, sensor.y + detection_size) + 1,
-            ):
-                sensor_pen = detection_size - abs(sensor.y - row)
-                row_ranges.setdefault(row, []).append(
-                    range(sensor.x - sensor_pen, sensor.x + sensor_pen + 1)
-                )
+        for no_beacons_below in (False, True):
+            for slope_down in (False, True):
+                if no_beacons_below:
+                    point_on_edge_y = sensor.y - (detection_size + 1)
+                else:
+                    point_on_edge_y = sensor.y + (detection_size + 1)
+                if slope_down:
+                    y_intercept = point_on_edge_y - sensor.x
+                else:
+                    y_intercept = point_on_edge_y + sensor.x
+                this_edge = DetectionEdgeLine(y_intercept, no_beacons_below, slope_down)
+                detection_edges.setdefault(this_edge, []).append((sensor, detection_size))
 
-    x_val = -10
-    for row, blocked_ranges in row_ranges.items():
-        counted_upto = 0
-        for r in sorted(blocked_ranges, key=lambda x: x.start):
-            range_from = max(counted_upto, r.start)
-            if range_from > counted_upto:
-                # Break in the range
-                x_val = counted_upto
-                break
-            counted_upto = max(counted_upto, r.stop)
-            if counted_upto > dim_max:
-                break
-        if x_val >= 0:
-            return x_val * 4_000_000 + row
+                if DetectionEdgeLine(y_intercept, not no_beacons_below, slope_down) in detection_edges:
+                    # The opposite partner of this edge is present - which means's there is a line where
+                    # beacons could be with areas where they can't above and below
+                    edge_pairs.setdefault(slope_down, set()).add(y_intercept)
 
-    return 0
+    # For each pair of lines (one sloping down and one up) compute the intersection point
+    # This point *might be* on the edge of 4 sensor detection zones.
+    candidate_points: set[Point] = set()
+    for slope_down_intercept in edge_pairs.get(True, set()):
+        for slope_up_intercept in edge_pairs.get(False, set()):
+            intersec = Point((slope_up_intercept - slope_down_intercept) // 2,
+                             (slope_up_intercept + slope_down_intercept) // 2)
+
+            # Check that this intersection point is on the edge of each of the 4 sensor locations
+            # So far nothing is bounding the lines of the detection zone boarder
+            # and so the point could be too far away from the sensor zone
+            on_edges = True
+            for no_beacons_below in (False, True):
+                for slope_down in (False, True):
+                    y_intercept = slope_down_intercept if slope_down else slope_up_intercept
+                    on_an_edge = False
+                    for sensor, detection_size in detection_edges[DetectionEdgeLine(y_intercept, no_beacons_below, slope_down)]:
+                        if no_beacons_below:
+                            y_ok = (sensor.y - (detection_size + 1)) <= intersec.y <= sensor.y
+                        else:
+                            y_ok = sensor.y <= intersec.y <= sensor.y + (detection_size + 1)
+                        if no_beacons_below == slope_down:
+                            x_ok = sensor.x <= intersec.x <= sensor.x + (detection_size + 1)
+                        else:
+                            x_ok = (sensor.x - (detection_size + 1)) <= intersec.x <= sensor.x
+                        on_an_edge = on_an_edge or (x_ok and y_ok)
+                    on_edges = on_edges and on_an_edge
+            if on_edges:
+                candidate_points.add(intersec)
+
+    # After all this, it is possible that these points just on the edge of 4 detection zones
+    # might be int he middle of one or more detection zones - making them useless
+    for candidate in candidate_points:
+        for sensor, _, detection_size in sensor_beacons:
+            if candidate.taxicab_dist(sensor) <= detection_size:
+                break
+        else:
+            # This point isn't within another sensor's detection zone
+            result = candidate
+            break
+
+    return result.x * 4_000_000 + result.y
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:

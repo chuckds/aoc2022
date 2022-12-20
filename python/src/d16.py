@@ -21,8 +21,13 @@ class Valve:
     time_to_valve: dict[str, int] = field(default_factory=dict)
 
 
-def max_flow(at_valve: Valve, time_left: int, valves_to_open: set[str],
-             release_rate: int, valves: dict[str, Valve]) -> int:
+def max_flow(
+    at_valve: Valve,
+    time_left: int,
+    valves_to_open: set[str],
+    release_rate: int,
+    valves: dict[str, Valve],
+) -> int:
     max_flows = [release_rate * time_left]  # Do nothing flow
 
     valve_open_times = [
@@ -33,20 +38,28 @@ def max_flow(at_valve: Valve, time_left: int, valves_to_open: set[str],
     for valve_to_open, time_to_open in valve_open_times:
         next_valves_to_open = valves_to_open.copy()
         next_valves_to_open.remove(valve_to_open.name)
-        max_flows.append(time_to_open * release_rate +
-                         max_flow(valve_to_open,
-                                  time_left - time_to_open,
-                                  next_valves_to_open,
-                                  release_rate + valve_to_open.flow_rate,
-                                  valves))
+        max_flows.append(
+            time_to_open * release_rate
+            + max_flow(
+                valve_to_open,
+                time_left - time_to_open,
+                next_valves_to_open,
+                release_rate + valve_to_open.flow_rate,
+                valves,
+            )
+        )
 
     return max(max_flows)
 
 
-def max_flow_two(at_valve: Valve, e_at_valve: Valve, time_left: int,
-                 valves_to_open: set[str],
-                 release_rate: int,
-                 valves: dict[str, Valve]) -> int:
+def max_flow_two(
+    at_valve: Valve,
+    e_at_valve: Valve,
+    time_left: int,
+    valves_to_open: set[str],
+    release_rate: int,
+    valves: dict[str, Valve],
+) -> int:
     max_flows = [release_rate * time_left]  # Do nothing flow
 
     valve_open_times = [
@@ -57,12 +70,16 @@ def max_flow_two(at_valve: Valve, e_at_valve: Valve, time_left: int,
     for valve_to_open, time_to_open in valve_open_times:
         next_valves_to_open = valves_to_open.copy()
         next_valves_to_open.remove(valve_to_open.name)
-        max_flows.append(time_to_open * release_rate +
-                         max_flow(valve_to_open,
-                                  time_left - time_to_open,
-                                  next_valves_to_open,
-                                  release_rate + valve_to_open.flow_rate,
-                                  valves))
+        max_flows.append(
+            time_to_open * release_rate
+            + max_flow(
+                valve_to_open,
+                time_left - time_to_open,
+                next_valves_to_open,
+                release_rate + valve_to_open.flow_rate,
+                valves,
+            )
+        )
 
     return max(max_flows)
 
@@ -86,7 +103,9 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     valves: dict[str, Valve] = {}
     for line in input_file.read_text().splitlines():
         tokens = line.split(maxsplit=9)
-        valves[tokens[1]] = Valve(tokens[1], int(tokens[4].split("=")[1][:-1]), tokens[9].split(", "))
+        valves[tokens[1]] = Valve(
+            tokens[1], int(tokens[4].split("=")[1][:-1]), tokens[9].split(", ")
+        )
 
     for v in valves.values():
         v.connected_valves = [valves[valve_str] for valve_str in v.connected_valve_strs]
@@ -96,7 +115,7 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
 
     valves_to_open = set(v.name for v in valves.values() if v.flow_rate > 0)
     p1 = max_flow(valves["AA"], 30, valves_to_open, 0, valves)
-    #p2 = max_flow_two(valves["AA"], valves["AA"], 26, valves_to_open, 0, valves)
+    # p2 = max_flow_two(valves["AA"], valves["AA"], 26, valves_to_open, 0, valves)
     return (p1, p2)
 
 

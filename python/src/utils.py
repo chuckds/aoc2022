@@ -2,11 +2,22 @@ import json
 import inspect
 import importlib
 import timeit
+import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
+from contextlib import contextmanager
 
 
 input_dir = Path(__file__).parent.parent.parent / "input"
+
+
+@contextmanager
+def showtime(title: str) -> Iterator[None]:
+    st = time.perf_counter()
+    try:
+        yield
+    finally:
+        print(f"{title} took {time.perf_counter() - st:.6f}s")
 
 
 def get_puzzle_info(examples: bool) -> list[tuple[str, str, str, str]]:

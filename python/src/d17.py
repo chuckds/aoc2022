@@ -61,16 +61,22 @@ def check_move(
         return False, shape
 
 
-def stack_surface_simple(chamber_profile: list[int], col_contig_depth: list[int]) -> bool:
+def stack_surface_simple(
+    chamber_profile: list[int], col_contig_depth: list[int]
+) -> bool:
     c_h_d = zip(chamber_profile, col_contig_depth)
-    for (col_height, col_depth), (next_col_height, next_col_depth) in zip(c_h_d, islice(c_h_d, 1)):
+    for (col_height, col_depth), (next_col_height, next_col_depth) in zip(
+        c_h_d, islice(c_h_d, 1)
+    ):
         relevant_depth = col_depth if col_height > next_col_height else next_col_depth
         if abs(col_height - next_col_height) > relevant_depth:
             return False
     return True
 
 
-def update_per_column_info(shape: list[Point], col_heights: list[int], col_contig_depth: list[int]) -> None:
+def update_per_column_info(
+    shape: list[Point], col_heights: list[int], col_contig_depth: list[int]
+) -> None:
     for p in shape:
         if p.y > col_heights[p.x]:
             col_heights[p.x] = p.y
@@ -120,7 +126,11 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, ...]:
         chamber_profile = [c - min_height for c in col_heights]
         if stack_surface_simple(chamber_profile, col_contig_depth):
             # Remember this state since it is sealed
-            state_id = (tuple(chamber_profile), rock_count % len(shapes), move_count % len(moves))
+            state_id = (
+                tuple(chamber_profile),
+                rock_count % len(shapes),
+                move_count % len(moves),
+            )
             prev_rock_count = column_states.get(state_id, None)
             if prev_rock_count is not None:
                 prev_height = per_rock_heights[prev_rock_count + 1]
@@ -128,8 +138,16 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, ...]:
                 loop_height_gain = highest_rock - prev_height
                 answers = []
                 for total_rock in total_rocks:
-                    loops_to_do, into_loop = divmod(total_rock - rock_count - 1, loop_len)
-                    answers.append(highest_rock + loop_height_gain * loops_to_do + per_rock_heights[prev_rock_count + into_loop + 1] - prev_height + 1)
+                    loops_to_do, into_loop = divmod(
+                        total_rock - rock_count - 1, loop_len
+                    )
+                    answers.append(
+                        highest_rock
+                        + loop_height_gain * loops_to_do
+                        + per_rock_heights[prev_rock_count + into_loop + 1]
+                        - prev_height
+                        + 1
+                    )
                 break
             else:
                 column_states[state_id] = rock_count
@@ -142,4 +160,6 @@ if __name__ == "__main__":
     print(f"{example=}")
     real = p1p2(utils.real_input())
     print(f"{real=}")
-    assert example == utils.get_day_result(True) and real == utils.get_day_result(False), "Answers wrong"
+    assert example == utils.get_day_result(True) and real == utils.get_day_result(
+        False
+    ), "Answers wrong"

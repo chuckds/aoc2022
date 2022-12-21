@@ -6,7 +6,8 @@ from __future__ import annotations
 
 
 from pathlib import Path
-from typing import NamedTuple, TypeVar, Iterable, Iterator
+from typing import NamedTuple, TypeVar, Iterator
+from itertools import islice
 
 import utils
 
@@ -40,6 +41,8 @@ move_map = {
 
 chamber_width = 7
 
+move_down = Point(0, -1)
+
 
 def cycle_list(a_list: list[T]) -> Iterator[T]:
     while True:
@@ -58,14 +61,66 @@ def check_move(
         return False, shape
 
 
-def print_blocked(blocked: set[Point], highest_rock: int) -> None:
-    for row in range(highest_rock, -1, -1):
-        for col in range(chamber_width):
-            if Point(col, row) in blocked:
-                print("#", end="")
+def calc_height(moves: list[Point], total_rocks: int) -> int:
+    move_gen, shape_gen = cycle_list(moves), cycle_list(shapes)
+    highest_rock = -1
+    col_heights = [-1] * chamber_width
+    col_contig_depth = [0] * chamber_width
+    blocked: set[Point] = set()
+    rock_count, move_count = 0, 0
+    column_states: dict[tuple[tuple[int, ...], int, int], tuple[int, int]] = {}
+    height_from_loops = 0
+    seen = False
+    while rock_count < total_rocks:
+        shape_start = Point(2, highest_rock + 4)
+        shape_pos = shape_start.add_to_list(next(shape_gen)[:])
+        rock_count += 1
+
+        falling = True
+        while falling:
+            _, shape_pos = check_move(shape_pos, next(move_gen), blocked)
+            move_count += 1
+            falling, shape_pos = check_move(shape_pos, move_down, blocked)
+
+        # Shape has stopped falling
+        highest_rock = max(highest_rock, max(p.y for p in shape_pos))
+
+        for p in shape_pos:
+            if p.y > col_heights[p.x]:
+                col_heights[p.x] = p.y
+                if p.y > col_heights[p.x] + 1:
+                    # there's a gap
+                    col_contig_depth[p.x] = 1
+                else:
+                    # Contiguous with previous content
+                    col_contig_depth[p.x] += 1
             else:
-                print(".", end="")
-        print()
+                # Filled in a gap!
+                pass
+        min_c = min(col_heights)
+        chamber_profile = [c - min_c for c in col_heights]
+        c_h_d = zip(chamber_profile, col_contig_depth)
+        for (col_height, col_depth), (next_col_height, next_col_depth) in zip(c_h_d, islice(c_h_d, 1)):
+            relevant_depth = col_depth if col_height > next_col_height else next_col_depth
+            if abs(col_height - next_col_height) > relevant_depth:
+                break
+        else:
+            # Remeber this state since it is sealed
+            state_id = (tuple(chamber_profile), rock_count % len(shapes), move_count % len(moves))
+            prev_height, prev_rock_count = column_states.get(state_id, (None, None))
+            if prev_height is not None and not seen:
+                assert prev_rock_count is not None
+                loop_len = rock_count - prev_rock_count
+                loop_height_gain = highest_rock - prev_height
+                rocks_left = total_rocks - rock_count
+                loops_to_do = rocks_left // loop_len
+                height_from_loops = loop_height_gain * loops_to_do
+                rock_count += loops_to_do * loop_len
+                seen = True
+            else:
+                column_states[state_id] = (highest_rock, rock_count)
+        blocked.update(shape_pos)
+    return highest_rock + height_from_loops + 1
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
@@ -75,36 +130,10 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     for line in input_file.read_text().splitlines():
         moves = [move_map[char] for char in line]
 
-    move_gen, shape_gen = cycle_list(moves), cycle_list(shapes)
-    down = Point(0, -1)
-    highest_rock = -1
-    col_heights = [-1] * chamber_width
-    blocked: set[Point] = set()
-    rock_count = 0
-    total_rocks = 1_000_000_000_000
-    total_rocks = 2022
-    while rock_count < total_rocks:
-        shape_start = Point(2, highest_rock + 4)
-        shape_pos = shape_start.add_to_list(next(shape_gen)[:])
-        rock_count += 1
+    p1 = calc_height(moves, 2022)
+    p2 = calc_height(moves, 1_000_000_000_000)
 
-        falling = True
-        while falling:
-            _, shape_pos = check_move(shape_pos, next(move_gen), blocked)
-            falling, shape_pos = check_move(shape_pos, down, blocked)
-
-        # Shape has stopped falling
-        highest_rock = max(highest_rock, max(p.y for p in shape_pos))
-        if rock_count == 2022:
-            p1 = highest_rock + 1
-        for p in shape_pos:
-            if p.y > col_heights[p.x]:
-                col_heights[p.x] = p.y
-        min_c = min(col_heights)
-        print(" ".join([f"{h - min_c:03}" for h in col_heights]))
-        blocked.update(shape_pos)
-
-    return (p1, highest_rock)
+    return (p1, p2)
 
 
 if __name__ == "__main__":

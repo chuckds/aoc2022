@@ -87,7 +87,7 @@ def find_inside(points: set[Point], edge: set[Point]) -> set[Point]:
             inside.update(visited)
         poss_inside_points = (
             poss_inside_points - visited
-        )  # Either visted are dfinitely in or outside not possible anymore
+        )  # Visted are definitely in or outside not "possible" anymore
     return inside
 
 

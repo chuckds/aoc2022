@@ -47,7 +47,9 @@ def cycle_list(a_list: list[T]) -> Iterator[T]:
             yield elem
 
 
-def check_move(shape: list[Point], move: Point, blocked: set[Point]) -> tuple[bool, list[Point]]:
+def check_move(
+    shape: list[Point], move: Point, blocked: set[Point]
+) -> tuple[bool, list[Point]]:
     new_pos = move.add_to_list(shape)
     if all(p not in blocked and 0 <= p.x < chamber_width and p.y >= 0 for p in new_pos):
         # No collision move is good

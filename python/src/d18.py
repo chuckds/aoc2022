@@ -42,7 +42,9 @@ def find_outside(points: set[Point]) -> set[Point]:
     yzs: dict[tuple[int, int], tuple[int, int]] = {}
 
     for p in points:
-        for val, key, store in zip(p, ((p.y, p.z), (p.x, p.z), (p.x, p.y)), (yzs, xzs, xys)):
+        for val, key, store in zip(
+            p, ((p.y, p.z), (p.x, p.z), (p.x, p.y)), (yzs, xzs, xys)
+        ):
             c_max, c_min = store.get(key, (None, None))
             c_max = val if c_max is None else max(c_max, val)
             c_min = val if c_min is None else min(c_min, val)
@@ -83,13 +85,19 @@ def find_inside(points: set[Point], edge: set[Point]) -> set[Point]:
                         to_visit.add(adj)
         if not can_reach_outside:
             inside.update(visited)
-        poss_inside_points = poss_inside_points - visited  # Either visted are dfinitely in or outside not possible anymore
+        poss_inside_points = (
+            poss_inside_points - visited
+        )  # Either visted are dfinitely in or outside not possible anymore
     return inside
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
-    droplets = set([Point(*map(int, line.split(",")))
-                    for line in input_file.read_text().splitlines()])
+    droplets = set(
+        [
+            Point(*map(int, line.split(",")))
+            for line in input_file.read_text().splitlines()
+        ]
+    )
 
     p1, edge = surface_of_point_cloud(droplets)
     inner_area, _ = surface_of_point_cloud(find_inside(droplets, edge))

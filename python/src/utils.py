@@ -3,6 +3,7 @@ import inspect
 import importlib
 import timeit
 from pathlib import Path
+from typing import Any
 
 
 input_dir = Path(__file__).parent.parent.parent / "input"
@@ -26,6 +27,13 @@ def get_puzzle_info(examples: bool) -> list[tuple[str, str, str, str]]:
             )
 
     return day_parts
+
+
+def get_day_result(example: bool = False, day: str = "") -> Any:
+    day = day if day else Path(inspect.stack()[1].filename).stem
+    for a_day, _, _, result in get_puzzle_info(example):
+        if a_day == day:
+            return result
 
 
 def input(from_file: str, subdir: str) -> Path:

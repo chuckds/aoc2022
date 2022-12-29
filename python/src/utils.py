@@ -40,11 +40,14 @@ def get_puzzle_info(examples: bool) -> list[tuple[str, str, str, str]]:
     return day_parts
 
 
-def get_day_result(example: bool = False, day: str = "") -> Any:
+def get_day_info(day: str = "") -> list[tuple[str, str, Any, bool]]:
     day = day if day else Path(inspect.stack()[1].filename).stem
-    for a_day, _, _, result in get_puzzle_info(example):
-        if a_day == day:
-            return result
+    day_info = []
+    for example in (True, False):
+        for a_day, function, input_file, result in get_puzzle_info(example):
+            if a_day == day:
+                day_info.append((function, input_file, result, example))
+    return day_info
 
 
 def input(from_file: str, subdir: str) -> Path:
@@ -58,6 +61,21 @@ def real_input(day: str = "") -> Path:
 
 def example_input(day: str = "") -> Path:
     return input(day if day else inspect.stack()[1].filename, "examples")
+
+
+def per_day_main(day: str = "") -> None:
+    day = day if day else Path(inspect.stack()[1].filename).stem
+    day_info = get_day_info(day)
+    day_mod = importlib.__import__(day)
+    to_check = []
+    for function, input_file, expected_result, example in day_info:
+        part_function = getattr(day_mod, function)
+        result = part_function(input_dir / input_file)
+        name = "example" if example else "real"
+        print(f"{name} = {result}")
+        to_check.append((expected_result, result, name))
+    for expected_result, result, name in to_check:
+        assert expected_result == result, f"{name} result wrong"
 
 
 def run_all() -> None:

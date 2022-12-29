@@ -156,10 +156,4 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, ...]:
 
 
 if __name__ == "__main__":
-    example = p1p2(utils.example_input())
-    print(f"{example=}")
-    real = p1p2(utils.real_input())
-    print(f"{real=}")
-    assert example == utils.get_day_result(True) and real == utils.get_day_result(
-        False
-    ), "Answers wrong"
+    utils.per_day_main()

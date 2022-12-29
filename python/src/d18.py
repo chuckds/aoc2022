@@ -106,5 +106,4 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
 
 
 if __name__ == "__main__":
-    print(p1p2(utils.example_input()))
-    print(p1p2(utils.real_input()))
+    utils.per_day_main()

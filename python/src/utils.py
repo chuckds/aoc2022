@@ -96,10 +96,10 @@ def run_all() -> None:
     )
 
     for avg_time, num_calls, total_time, day in sorted(timing_data, reverse=True):
-        print(f"{day} avg {avg_time} ({num_calls} calls in {total_time})")
+        print(f"{day} avg {avg_time:.9f} ({num_calls} calls in {total_time:.9f})")
 
     print(
-        f"All {len(test_calls)} days take {all_days / ALL_COUNT} on average ({ALL_COUNT} calls in {all_days})"
+        f"All {len(test_calls)} days take {all_days / ALL_COUNT:.9f} on average ({ALL_COUNT} calls in {all_days:.9f})"
     )
     return
 

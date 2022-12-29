@@ -31,6 +31,7 @@ function newday {
     echo "Get day $RAW_DAY (pretty version $NEW_DAY)"
 
     # Do NOT commit the real puzzle input - it shouldn't be shared!
+    # Grab the input first so that it fails early if network access is an issue
     aoc download -I --input-file input/real/${NEW_DAY} --year 2022 --day $RAW_DAY
     touch ${REPO_ROOT}/input/examples/${NEW_DAY}
     git add ${REPO_ROOT}/input/examples/${NEW_DAY}

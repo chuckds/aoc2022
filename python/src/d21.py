@@ -70,8 +70,10 @@ class MonkeyDepends(Monkey):
     _dep_not_var: int = field(default=0, init=False)
 
     def get_val(self) -> int:
-        return self.op(self.monkeys[self.depends[0]].get_val(),
-                       self.monkeys[self.depends[1]].get_val())
+        return self.op(
+            self.monkeys[self.depends[0]].get_val(),
+            self.monkeys[self.depends[1]].get_val(),
+        )
 
     def depends_on_variable(self, name: str) -> bool:
         res = False
@@ -86,7 +88,9 @@ class MonkeyDepends(Monkey):
     def find_inverse(self, result: int) -> int:
         # What value does the unresolvable dependency need to be to give result?
         inv_op = op_to_inverse[self.op][self._dep_not_var]
-        sub_result = inv_op(result, self.monkeys[self.depends[self._dep_not_var]].get_val())
+        sub_result = inv_op(
+            result, self.monkeys[self.depends[self._dep_not_var]].get_val()
+        )
         return self.monkeys[self.depends[self._dep_var]].find_inverse(sub_result)
 
 
@@ -99,7 +103,9 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
             monkeys[monkey] = MonkeyVal(monkey, monkeys, val)
         except ValueError:
             dep1, op, dep2 = op_str.split()
-            monkeys[monkey] = MonkeyDepends(monkey, monkeys, op_to_func[op], (dep1, dep2))
+            monkeys[monkey] = MonkeyDepends(
+                monkey, monkeys, op_to_func[op], (dep1, dep2)
+            )
 
     root_monkey = cast(MonkeyDepends, monkeys["root"])
     p1 = root_monkey.get_val()

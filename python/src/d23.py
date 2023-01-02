@@ -36,7 +36,9 @@ class Point(NamedTuple):
         for y_delta in (-1, 0, 1):
             yield Point(self.x + 1, self.y + y_delta)
 
-    def the_answer(self, offsets: Iterable[Point], elf_posns: set[Point]) -> tuple[Point | None, bool]:
+    def the_answer(
+        self, offsets: Iterable[Point], elf_posns: set[Point]
+    ) -> tuple[Point | None, bool]:
         first_poss_posn = None
         any_elves_around = False
         for offset in offsets:
@@ -45,8 +47,10 @@ class Point(NamedTuple):
                 any_elves_around = True
                 continue
             for delta in (-1, 1):
-                new_posn = Point(self.x + (delta if offset.x == 0 else offset.x),
-                                 self.y + (delta if offset.y == 0 else offset.y))
+                new_posn = Point(
+                    self.x + (delta if offset.x == 0 else offset.x),
+                    self.y + (delta if offset.y == 0 else offset.y),
+                )
                 if new_posn in elf_posns:
                     any_elves_around = True
                     break
@@ -63,15 +67,22 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
             if char == "#":
                 elf_posns.add(Point(char_idx, row_idx))
 
-    offsets = deque([(Point.norths, Point(0, -1)), (Point.souths, Point(0, 1)), (Point.wests, Point(-1, 0)), (Point.easts, Point(1, 0))])
-    #offsets = deque([Point(0, -1), Point(0, 1), Point(-1, 0), Point(1, 0)])
+    offsets = deque(
+        [
+            (Point.norths, Point(0, -1)),
+            (Point.souths, Point(0, 1)),
+            (Point.wests, Point(-1, 0)),
+            (Point.easts, Point(1, 0)),
+        ]
+    )
+    # offsets = deque([Point(0, -1), Point(0, 1), Point(-1, 0), Point(1, 0)])
     elf_moved = True
     round = 0
     while elf_moved:
         elf_moved = False
         next_posns: dict[Point, Point | None] = {}
         for elf in elf_posns:
-            #proposed_new_loc, any_elves = elf.the_answer(offsets, elf_posns)
+            # proposed_new_loc, any_elves = elf.the_answer(offsets, elf_posns)
             if any(adj in elf_posns for adj in elf.adjacents()):
                 # Find out which direction doesn't have an elf and move towards it
                 for dir_func, offset in offsets:

@@ -36,15 +36,21 @@ def how_many_can_afford(cost: PER_RES_COUNT, bank: PER_RES_COUNT) -> int:
     return min(how_many)
 
 
-def get_min_to_afford(cost: PER_RES_COUNT, bank: PER_RES_COUNT, robots: PER_RES_COUNT) -> int:
+def get_min_to_afford(
+    cost: PER_RES_COUNT, bank: PER_RES_COUNT, robots: PER_RES_COUNT
+) -> int:
     shortfall = [c - b for b, c in zip(bank, cost)]
     if any(s > 0 and r == 0 for s, r in zip(shortfall, robots)):
         # Never gonna happen
         return sys.maxsize
-    return max(math.ceil(s / r) if s > 0 else 0 for s, r in zip(shortfall, robots) if r > 0)
+    return max(
+        math.ceil(s / r) if s > 0 else 0 for s, r in zip(shortfall, robots) if r > 0
+    )
 
 
-def algo(time_left: int, bank: PER_RES_COUNT, robots: PER_RES_COUNT, bp: Blueprint) -> Resource | None:
+def algo(
+    time_left: int, bank: PER_RES_COUNT, robots: PER_RES_COUNT, bp: Blueprint
+) -> Resource | None:
     if time_left <= 1:
         # No point buying anything it won't make a difference
         return None
@@ -61,7 +67,9 @@ def algo(time_left: int, bank: PER_RES_COUNT, robots: PER_RES_COUNT, bp: Bluepri
                 buy = True
                 for better_res, better_min_to_afford in better_res_costs:
                     better_res_cost = bp.res_robot_costs[better_res.value]
-                    new_min_to_afford = get_min_to_afford(better_res_cost, new_bank, new_robots)
+                    new_min_to_afford = get_min_to_afford(
+                        better_res_cost, new_bank, new_robots
+                    )
                     if new_min_to_afford + 1 > better_min_to_afford:
                         buy = False
                 if buy:
@@ -76,12 +84,15 @@ def algo(time_left: int, bank: PER_RES_COUNT, robots: PER_RES_COUNT, bp: Bluepri
                 better_res_costs.append((res, min_to_afford))
     return None
 
+
 @dataclass
 class Blueprint:
     num: int
     res_robot_costs: ROBOT_COSTS
 
-    def purchase_options(self, bank: PER_RES_COUNT, for_res: Resource = Resource.GEODE) -> Iterator[tuple[PER_RES_COUNT, PER_RES_COUNT]]:
+    def purchase_options(
+        self, bank: PER_RES_COUNT, for_res: Resource = Resource.GEODE
+    ) -> Iterator[tuple[PER_RES_COUNT, PER_RES_COUNT]]:
         if for_res == Resource.ORE:
             robot_cost = self.res_robot_costs[for_res.value]
             count = how_many_can_afford(robot_cost, bank)
@@ -93,23 +104,29 @@ class Blueprint:
         else:
             robot_cost = self.res_robot_costs[for_res.value]
             count = how_many_can_afford(robot_cost, bank)
-            min_count = 1 if for_res in (Resource.GEODE, Resource.OBSIDIAN) and count > 0 else 0
+            min_count = (
+                1 if for_res in (Resource.GEODE, Resource.OBSIDIAN) and count > 0 else 0
+            )
             for num in range(min_count, count + 1):
                 num_robot_cost = [num * c for c in robot_cost]
-                for po, cost in self.purchase_options([b - c for b, c in zip(bank, num_robot_cost)], Resource(for_res.value - 1)):
+                for po, cost in self.purchase_options(
+                    [b - c for b, c in zip(bank, num_robot_cost)],
+                    Resource(for_res.value - 1),
+                ):
                     po[for_res.value] += num
-                    yield po, [c + per_res_c for c, per_res_c in zip(cost, num_robot_cost)]
+                    yield po, [
+                        c + per_res_c for c, per_res_c in zip(cost, num_robot_cost)
+                    ]
 
-    def max_geodes(self, time_available: int,
-                   robots: PER_RES_COUNT,
-                   bank: PER_RES_COUNT) -> int:
+    def max_geodes(
+        self, time_available: int, robots: PER_RES_COUNT, bank: PER_RES_COUNT
+    ) -> int:
         geodes = [bank[Resource.GEODE.value]]
         if time_available > 0:
             for po, cost in self.purchase_options(bank):
                 new_robots = [current + new for current, new in zip(robots, po)]
                 new_bank = [b + r - c for b, r, c in zip(bank, robots, cost)]
-                geodes.append(self.max_geodes(
-                    time_available - 1, new_robots, new_bank))
+                geodes.append(self.max_geodes(time_available - 1, new_robots, new_bank))
             if time_available > 3:
                 print("#" * (time_available - 2) ** 2)
         return max(geodes)
@@ -131,7 +148,9 @@ class Blueprint:
                 max_deode = max(max_deode, bank[Resource.GEODE.value])
             else:
                 for po, cost in self.purchase_options(bank):
-                    new_robots = [current + new for current, new in zip(robot_counts, po)]
+                    new_robots = [
+                        current + new for current, new in zip(robot_counts, po)
+                    ]
                     new_bank = [b + r - c for b, r, c in zip(bank, robot_counts, cost)]
                     key = (tuple(new_robots), tuple(new_bank))
                     if key not in visited:
@@ -149,9 +168,13 @@ class Blueprint:
             if res_to_buy is None:
                 print(f"{time_disp} nothing bought {bank}")
             else:
-                bank = [b - c for b, c in zip(bank, self.res_robot_costs[res_to_buy.value])]
+                bank = [
+                    b - c for b, c in zip(bank, self.res_robot_costs[res_to_buy.value])
+                ]
                 robot_counts[res_to_buy.value] += 1
-                print(f"{time_disp} bought {res_to_buy} bank {bank} rbots {robot_counts}")
+                print(
+                    f"{time_disp} bought {res_to_buy} bank {bank} rbots {robot_counts}"
+                )
 
         return bank[Resource.GEODE.value]
 
@@ -172,13 +195,13 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
                 cost[Resource[res_str.upper()].value] = int(num_str)
         blueprints.append(Blueprint(bp_num, robot_info))
 
-    #print(blueprints[1].run_algo(time_available))
-    #foo = 12
-    #print([x for x in blueprints[0].purchase_options([7, 7, 7, 7])])
-    #print(f"{blueprints[0].search(time_available)=}")
-    #robot_counts = [0] * len(Resource)
-    #robot_counts[Resource.ORE.value] = 1
-    #max_geodes = [bp.num * bp.max_geodes(time_available, robot_counts, [0] * len(Resource))
+    # print(blueprints[1].run_algo(time_available))
+    # foo = 12
+    # print([x for x in blueprints[0].purchase_options([7, 7, 7, 7])])
+    # print(f"{blueprints[0].search(time_available)=}")
+    # robot_counts = [0] * len(Resource)
+    # robot_counts[Resource.ORE.value] = 1
+    # max_geodes = [bp.num * bp.max_geodes(time_available, robot_counts, [0] * len(Resource))
     #              for bp in blueprints]
 
     return (p1, p2)

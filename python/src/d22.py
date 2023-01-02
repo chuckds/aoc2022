@@ -21,10 +21,15 @@ cmd_to_rotation_mat = {
 
 
 def rotate(rotation: list[list[int]], vec: tuple[int, ...]) -> tuple[int, ...]:
-    return tuple(sum(mat_val * vec_val for mat_val, vec_val in zip(mat_row, vec)) for mat_row in rotation)
+    return tuple(
+        sum(mat_val * vec_val for mat_val, vec_val in zip(mat_row, vec))
+        for mat_row in rotation
+    )
 
 
-def rotate_about(posn: tuple[int, ...], centre: tuple[int, ...], rotation: list[list[int]]) -> tuple[int, ...]:
+def rotate_about(
+    posn: tuple[int, ...], centre: tuple[int, ...], rotation: list[list[int]]
+) -> tuple[int, ...]:
     offcentre = tuple(p - c for p, c in zip(posn, centre))
     rotated = rotate(rotation, offcentre)
     return tuple(p + c for p, c in zip(rotated, centre))
@@ -49,15 +54,23 @@ MIN = 1 / 2
 MAX = -1 / 2
 
 
-def p1_wrap(posn: tuple[int, int], direction: tuple[int, int], bdl: dict[tuple[int | float, int | float], int]) -> tuple[tuple[int, int], tuple[int, int]]:
+def p1_wrap(
+    posn: tuple[int, int],
+    direction: tuple[int, int],
+    bdl: dict[tuple[int | float, int | float], int],
+) -> tuple[tuple[int, int], tuple[int, int]]:
     lookup = tuple(-p if d == 0 else d / 2 for p, d in zip(posn, direction))
     new_val = bdl[lookup]  # type: ignore
     return tuple(p if d == 0 else new_val for p, d in zip(posn, direction)), direction  # type: ignore
 
 
-def p1_walk(posn: tuple[int, int], direction: tuple[int, int], cmds: list[int | str],
-            board: dict[tuple[int, int], bool],
-            bdl: dict[tuple[int | float, int | float], int]) -> tuple[tuple[int, int], tuple[int, int]]:
+def p1_walk(
+    posn: tuple[int, int],
+    direction: tuple[int, int],
+    cmds: list[int | str],
+    board: dict[tuple[int, int], bool],
+    bdl: dict[tuple[int | float, int | float], int],
+) -> tuple[tuple[int, int], tuple[int, int]]:
     for cmd in cmds:
         if isinstance(cmd, int):
             for _ in range(cmd):
@@ -116,7 +129,9 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
                 if char != " ":
                     if (MIN, -row_num) not in bdl:
                         bdl[(MIN, -row_num)] = col_num
-                    bdl[(-col_num, MIN)] = min(row_num, bdl.get((-col_num, MIN), sys.maxsize))
+                    bdl[(-col_num, MIN)] = min(
+                        row_num, bdl.get((-col_num, MIN), sys.maxsize)
+                    )
                     bdl[(-col_num, MAX)] = max(row_num, bdl.get((-col_num, MAX), -1))
                     blocked = True if char == "#" else False
                     board[(col_num, row_num)] = blocked

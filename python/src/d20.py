@@ -59,8 +59,10 @@ def first(input_file: Path) -> tuple[int, int]:
     numbers, zero_num = parse_numbers(input_file)
     mix_numbers(numbers)
 
-    p1 = sum(numbers[(zero_num.index + raw_idx) % len(numbers)].value
-             for raw_idx in grove_coord_indicies)
+    p1 = sum(
+        numbers[(zero_num.index + raw_idx) % len(numbers)].value
+        for raw_idx in grove_coord_indicies
+    )
     return (p1, p2)
 
 

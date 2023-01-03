@@ -53,6 +53,13 @@ class Grid:
             posn = Point((posn.x + direction.value[0]) % self.dimentions.x,
                          (posn.y + direction.value[1]) % self.dimentions.y)
 
+    def blizz_free_min1(self, from_min: int, to_min: int, point: Point) -> Iterator[int]:
+        blocked_on = self.cell_blizzard_blocked.get(point, None)
+        for min in range(from_min, to_min if to_min > from_min else to_min + self.cycle):
+            wrapped_min = min % self.cycle
+            if blocked_on is None or wrapped_min not in blocked_on:
+                yield wrapped_min
+
     def blizz_free_min(self, from_min: int, to_min: int, point: Point) -> set[int]:
         blocked_on = self.cell_blizzard_blocked.get(point, None)
         if blocked_on is None:
@@ -62,7 +69,7 @@ class Grid:
                             if ((x - from_min) % self.cycle) <= ((to_min - from_min - 1) % self.cycle))
         return set(range((to_min - from_min - 1) % self.cycle + 1)) - blizz_min
 
-    def min_till_blizzard(self, at_min: int, point: Point) -> int:
+    def next_min_with_blizz(self, at_min: int, point: Point) -> int:
         blocked_on = self.cell_blizzard_blocked.get(point, None)
         if blocked_on is None:
             return at_min  # No blizzard goes through this point
@@ -80,7 +87,7 @@ class Grid:
             posn, min_mod_cycle = posn_id
             if posn == end:
                 return min_to_here
-            min_till_blizz = self.min_till_blizzard(min_mod_cycle, posn)
+            min_till_blizz = self.next_min_with_blizz(min_mod_cycle, posn)
             for adj in posn.adjacents(self.dimentions):
                 adj_blizz_free = self.blizz_free_min(min_mod_cycle + 1,
                                                      min_till_blizz + 1, adj)

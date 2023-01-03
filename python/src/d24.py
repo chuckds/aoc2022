@@ -60,14 +60,14 @@ class Grid:
         else:
             blizz_min = set((x - from_min) % self.cycle for x in blocked_on
                             if ((x - from_min) % self.cycle) <= ((to_min - from_min - 1) % self.cycle))
-        return set(range(to_min - from_min)) - blizz_min
+        return set(range((to_min - from_min - 1) % self.cycle + 1)) - blizz_min
 
     def min_till_blizzard(self, at_min: int, point: Point) -> int:
         blocked_on = self.cell_blizzard_blocked.get(point, None)
         if blocked_on is None:
-            return self.cycle  # No blizzard goes through this point
+            return at_min  # No blizzard goes through this point
         else:
-            return min((x - at_min) % self.cycle for x in blocked_on)
+            return min(blocked_on, key=lambda x: (x - at_min) % self.cycle)
 
     def dj(self, start: Point, start_min: int, end: Point) -> int:
         to_visit = [(0, (start, start_min))]
@@ -83,7 +83,7 @@ class Grid:
             min_till_blizz = self.min_till_blizzard(min_mod_cycle, posn)
             for adj in posn.adjacents(self.dimentions):
                 adj_blizz_free = self.blizz_free_min(min_mod_cycle + 1,
-                                                     min_mod_cycle + min_till_blizz + 1, adj)
+                                                     min_till_blizz + 1, adj)
                 for min in adj_blizz_free:
                     posn_id = (adj, (min_mod_cycle + 1 + min) % self.cycle)
                     if posn_id not in visited:

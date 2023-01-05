@@ -8,8 +8,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from enum import Enum
-from typing import NamedTuple, Iterator
-from bisect import insort
+from typing import NamedTuple, Iterator, Iterable
+from bisect import insort, bisect_right, bisect_left
 import math
 
 import utils
@@ -38,9 +38,23 @@ class Grid:
     dimentions: Point
     cycle: int = field(init=False)
     cell_blizzard_blocked: dict[Point, set[int]] = field(default_factory=dict)
+    cell_blizz_min: dict[Point, list[int]] = field(default_factory=dict)
+    cell_free_min: dict[Point, list[int]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.cycle = math.lcm(self.dimentions.x, self.dimentions.y)
+
+    def perf(self) -> None:
+        for point, blizz_min in self.cell_blizzard_blocked.items():
+            self.cell_blizz_min[point] = sorted(blizz_min)
+        for point, blizz_min_sorted in self.cell_blizz_min.items():
+            prev_min = 0
+            point_free_min: list[int] = []
+            for min in blizz_min_sorted:
+                point_free_min.extend(range(prev_min, min))
+                prev_min = min + 1
+            point_free_min.extend(range(prev_min, self.cycle))
+            self.cell_free_min[point] = point_free_min
 
     def add_blizzard(self, blizzard_posn: Point,
                      direction: Direction) -> None:
@@ -53,67 +67,71 @@ class Grid:
             posn = Point((posn.x + direction.value[0]) % self.dimentions.x,
                          (posn.y + direction.value[1]) % self.dimentions.y)
 
-    def blizz_free_min1(self, from_min: int, to_min: int, point: Point) -> Iterator[int]:
-        blocked_on = self.cell_blizzard_blocked.get(point, None)
-        for min in range(from_min, to_min if to_min > from_min else to_min + self.cycle):
-            wrapped_min = min % self.cycle
-            if blocked_on is None or wrapped_min not in blocked_on:
-                yield wrapped_min
-
-    def blizz_free_min(self, from_min: int, to_min: int, point: Point) -> set[int]:
-        blocked_on = self.cell_blizzard_blocked.get(point, None)
-        if blocked_on is None:
-            blizz_min = set()  # No blizzard goes through this point
+    def blizz_free_min(self, from_min: int, to_min: int, point: Point) -> Iterable[int]:
+        free_on = self.cell_free_min.get(point, None)
+        for_min = (to_min - from_min - 1) % self.cycle + 1
+        if free_on is None:  # No blizzards pass this point so always free
+            for x in range(for_min):
+                yield x
         else:
-            blizz_min = set((x - from_min) % self.cycle for x in blocked_on
-                            if ((x - from_min) % self.cycle) <= ((to_min - from_min - 1) % self.cycle))
-        return set(range((to_min - from_min - 1) % self.cycle + 1)) - blizz_min
+            idx = bisect_left(free_on, from_min)
+            if idx == len(free_on):
+                idx = 0  # wrap around
+            for idx in range(idx, idx + len(free_on)):
+                min_free = free_on[idx % len(free_on)]
+                min_away = (min_free - from_min) % self.cycle
+                if min_away < for_min:
+                    yield min_away
+                else:
+                    break
 
     def next_min_with_blizz(self, at_min: int, point: Point) -> int:
-        blocked_on = self.cell_blizzard_blocked.get(point, None)
+        blocked_on = self.cell_blizz_min.get(point, None)
         if blocked_on is None:
             return at_min  # No blizzard goes through this point
         else:
-            return min(blocked_on, key=lambda x: (x - at_min) % self.cycle)
+            idx = bisect_right(blocked_on, at_min)
+            return blocked_on[0] if idx == len(blocked_on) else blocked_on[idx]
 
     def dj(self, start: Point, start_min: int, end: Point) -> int:
         to_visit = [(0, (start, start_min))]
         visited = {}
         while to_visit:
             min_to_here, posn_id = to_visit.pop()
-            if posn_id in visited:
+            if posn_id in visited:  # Must have been on to_visit multiple times - the first one will have been the quickest so discard
                 continue
             visited[posn_id] = min_to_here
             posn, min_mod_cycle = posn_id
             if posn == end:
                 return min_to_here
-            min_till_blizz = self.next_min_with_blizz(min_mod_cycle, posn)
+            next_blizz_min = self.next_min_with_blizz(min_mod_cycle, posn)
+
+            # For each minute that we can wait here add that as the shortest path
+            for min in range(1, (next_blizz_min - min_mod_cycle) % self.cycle):
+                pos_id = (posn, (min_mod_cycle + min) % self.cycle)
+                visited[pos_id] = min_to_here + min
+
+            # For each adjacent cell visit it at each possible minute
             for adj in posn.adjacents(self.dimentions):
-                adj_blizz_free = self.blizz_free_min(min_mod_cycle + 1,
-                                                     min_till_blizz + 1, adj)
-                for min in adj_blizz_free:
+                for min in self.blizz_free_min(min_mod_cycle + 1,
+                                               next_blizz_min + 1, adj):
                     posn_id = (adj, (min_mod_cycle + 1 + min) % self.cycle)
                     if posn_id not in visited:
                         insort(to_visit, ((min_to_here + 1 + min, posn_id)), key=lambda x: -1 * x[0])
         return -2
 
 
-char_to_dir = {
-    ">": Direction.RIGHT,
-    "v": Direction.DOWN,
-    "<": Direction.LEFT,
-    "^": Direction.UP,
-}
-
-
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
     p2 = 0
     blizzards: list[tuple[Point, Direction]] = []
-    grid_width = 0
     start, dest = None, None
+    char_to_dir = {
+        ">": Direction.RIGHT,
+        "v": Direction.DOWN,
+        "<": Direction.LEFT,
+        "^": Direction.UP,
+    }
     for row_idx, line in enumerate(input_file.read_text().splitlines()):
-        if not grid_width:
-            grid_width = len(line) - 2
         for col_idx, char in enumerate(line):
             if char != "#" and start is None:
                 start = Point(col_idx - 1, row_idx - 1)
@@ -126,15 +144,15 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
                 blizzards.append((Point(col_idx - 1, row_idx - 1), blizzard_dir))
 
     assert start is not None and dest is not None
-    grid = Grid(Point(grid_width, row_idx - 1))
+    grid = Grid(Point(len(line) - 2, row_idx - 1))
     for blizzard_posn, blizzard_dir in blizzards:
         grid.add_blizzard(blizzard_posn, blizzard_dir)
+    grid.perf()
 
     p1 = grid.dj(start, 0, dest) + 1  # Extra 1 to account for getting to the edge from dest
-    if p1 == 18:
-        back_to_start = grid.dj(Point(dest.x, dest.y + 1), p1 % grid.cycle, Point(start.x, start.y + 1)) + 1  # Extra 1 to account for getting to the edge from dest
-        back_to_dest = grid.dj(start, (p1 + back_to_start) % grid.cycle, dest) + 1
-        p2 = p1 + back_to_start + back_to_dest
+    back_to_start = grid.dj(Point(dest.x, dest.y + 1), p1 % grid.cycle, Point(start.x, start.y + 1)) + 1  # Extra 1 to account for getting to the edge from dest
+    back_to_dest = grid.dj(start, (p1 + back_to_start) % grid.cycle, dest) + 1
+    p2 = p1 + back_to_start + back_to_dest
     return (p1, p2)
 
 

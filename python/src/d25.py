@@ -8,7 +8,6 @@ from __future__ import annotations
 from pathlib import Path
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Iterable
 from itertools import zip_longest
 from collections import deque
 

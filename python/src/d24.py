@@ -56,16 +56,17 @@ class Grid:
             point_free_min.extend(range(prev_min, self.cycle))
             self.cell_free_min[point] = point_free_min
 
-    def add_blizzard(self, blizzard_posn: Point,
-                     direction: Direction) -> None:
+    def add_blizzard(self, blizzard_posn: Point, direction: Direction) -> None:
         posn = blizzard_posn
         limit = [g for g, d in zip(self.dimentions, direction.value) if d != 0][0]
         for min_mod in range(limit):
-            self.cell_blizzard_blocked.setdefault(
-                posn, set()).update(min_mod + cycle * limit
-                                    for cycle in range(self.cycle // limit))
-            posn = Point((posn.x + direction.value[0]) % self.dimentions.x,
-                         (posn.y + direction.value[1]) % self.dimentions.y)
+            self.cell_blizzard_blocked.setdefault(posn, set()).update(
+                min_mod + cycle * limit for cycle in range(self.cycle // limit)
+            )
+            posn = Point(
+                (posn.x + direction.value[0]) % self.dimentions.x,
+                (posn.y + direction.value[1]) % self.dimentions.y,
+            )
 
     def blizz_free_min(self, from_min: int, to_min: int, point: Point) -> Iterable[int]:
         free_on = self.cell_free_min.get(point, None)
@@ -98,7 +99,9 @@ class Grid:
         visited = {}
         while to_visit:
             min_to_here, posn_id = to_visit.pop()
-            if posn_id in visited:  # Must have been on to_visit multiple times - the first one will have been the quickest so discard
+            if (
+                posn_id in visited
+            ):  # Must have been on to_visit multiple times - the first one will have been the quickest so discard
                 continue
             visited[posn_id] = min_to_here
             posn, min_mod_cycle = posn_id
@@ -113,11 +116,16 @@ class Grid:
 
             # For each adjacent cell visit it at each possible minute
             for adj in posn.adjacents(self.dimentions):
-                for min in self.blizz_free_min(min_mod_cycle + 1,
-                                               next_blizz_min + 1, adj):
+                for min in self.blizz_free_min(
+                    min_mod_cycle + 1, next_blizz_min + 1, adj
+                ):
                     posn_id = (adj, (min_mod_cycle + 1 + min) % self.cycle)
                     if posn_id not in visited:
-                        insort(to_visit, ((min_to_here + 1 + min, posn_id)), key=lambda x: -1 * x[0])
+                        insort(
+                            to_visit,
+                            ((min_to_here + 1 + min, posn_id)),
+                            key=lambda x: -1 * x[0],
+                        )
         return -2
 
 
@@ -149,8 +157,13 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
         grid.add_blizzard(blizzard_posn, blizzard_dir)
     grid.perf()
 
-    p1 = grid.dj(start, 0, dest) + 1  # Extra 1 to account for getting to the edge from dest
-    back_to_start = grid.dj(Point(dest.x, dest.y + 1), p1 % grid.cycle, Point(start.x, start.y + 1)) + 1  # Extra 1 to account for getting to the edge from dest
+    p1 = (
+        grid.dj(start, 0, dest) + 1
+    )  # Extra 1 to account for getting to the edge from dest
+    back_to_start = (
+        grid.dj(Point(dest.x, dest.y + 1), p1 % grid.cycle, Point(start.x, start.y + 1))
+        + 1
+    )  # Extra 1 to account for getting to the edge from dest
     back_to_dest = grid.dj(start, (p1 + back_to_start) % grid.cycle, dest) + 1
     p2 = p1 + back_to_start + back_to_dest
     return (p1, p2)

@@ -56,7 +56,9 @@ class Snafu:
     def __add__(self, other: Snafu) -> Snafu:
         carry = 0
         new_digits: deque[str] = deque([])
-        for this_dig, other_dig in zip_longest(reversed(self.digits), reversed(other.digits), fillvalue=0):
+        for this_dig, other_dig in zip_longest(
+            reversed(self.digits), reversed(other.digits), fillvalue=0
+        ):
             new_dig, carry = self.dig_sum_to_char[this_dig + other_dig + carry]
             new_digits.appendleft(new_dig)
         if carry:

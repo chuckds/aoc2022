@@ -66,8 +66,19 @@ function timeday {
 
     DAY=$1
     pushd ${REPO_ROOT}/python/src
+    python3 -m timeit "import ${DAY}; ${DAY}.p1p2(${DAY}.utils.real_input('${DAY}'))"
+    popd
+}
+
+function qtimeday {
+    if [ -z "$1" ]; then
+        echo "Specify a day"
+        return 2
+    fi
+
+    DAY=$1
+    pushd ${REPO_ROOT}/python/src
     time python3 -c "import ${DAY}; print(${DAY}.p1p2(${DAY}.utils.real_input('${DAY}')))"
-    #python3 -m timeit "import ${DAY}; ${DAY}.p1p2(${DAY}.utils.real_input('${DAY}'))"
     popd
 }
 

@@ -17,7 +17,7 @@ const TEST_MAP: [(&str, AoCSolverFunc, bool); 6] = [
     ("d03", d03::p1p2, true),
     ("d04", d04::p1p2, true),
     ("d05", d05::p1p2, true),
-    ("d06", d06::p1p2, false),
+    ("d06", d06::p1p2, true),
 ];
 
 fn main() {
@@ -92,6 +92,7 @@ fn test_hash_json() -> TestJsonHash {
 #[case("d03", d03::p1p2)]
 #[case("d04", d04::p1p2)]
 #[case("d05", d05::p1p2)]
+#[case("d06", d06::p1p2)]
 fn day_test_json(
     test_hash_json: &TestJsonHash,
     #[case] day: &str,

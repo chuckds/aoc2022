@@ -22,6 +22,7 @@ def get_start_of_packet(datastream: str, window_size: int) -> int:
             try:
                 dupe_idx = marker_window[: window_size - index - 1].index(char)
                 move_forward = max(move_forward, dupe_idx + 1)
+                break
             except ValueError:
                 # char not present
                 continue
@@ -42,3 +43,7 @@ def p1p2(input_file: Path = utils.real_input()) -> tuple[list[int], list[int]]:
         p2.append(get_start_of_packet(ds, window_size=14))
 
     return (p1, p2)
+
+
+if __name__ == "__main__":
+    utils.per_day_main()

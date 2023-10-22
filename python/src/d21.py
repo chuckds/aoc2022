@@ -27,7 +27,10 @@ op_to_func: dict[str, MONKEY_MATH_OP] = {
 # Index by which dependecy is resolvable
 op_to_inverse: dict[MONKEY_MATH_OP, tuple[MONKEY_MATH_OP, MONKEY_MATH_OP]] = {
     operator.mul: (operator.floordiv, operator.floordiv),
-    operator.floordiv: (lambda result, dep: operator.floordiv(dep, result), operator.mul),
+    operator.floordiv: (
+        lambda result, dep: operator.floordiv(dep, result),
+        operator.mul,
+    ),
     operator.add: (operator.sub, operator.sub),
     operator.sub: (lambda result, dep: operator.sub(dep, result), operator.add),
 }

@@ -14,6 +14,7 @@ function check {
     echo "Run Taskfile help to see other task you can run"
     echo "Running the default precommit checks"
     mypy --strict ${REPO_ROOT}/python/src/*.py
+    ruff check python/src/
     pytest ${REPO_ROOT}/python/src
     pushd ${REPO_ROOT}/rust
     cargo test

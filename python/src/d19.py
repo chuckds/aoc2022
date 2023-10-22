@@ -114,9 +114,10 @@ class Blueprint:
                     Resource(for_res.value - 1),
                 ):
                     po[for_res.value] += num
-                    yield po, [
-                        c + per_res_c for c, per_res_c in zip(cost, num_robot_cost)
-                    ]
+                    yield (
+                        po,
+                        [c + per_res_c for c, per_res_c in zip(cost, num_robot_cost)],
+                    )
 
     def max_geodes(
         self, time_available: int, robots: PER_RES_COUNT, bank: PER_RES_COUNT
@@ -180,7 +181,7 @@ class Blueprint:
 
 
 def p1p2(input_file: Path = utils.real_input()) -> tuple[int, int]:
-    time_available = 24
+    # time_available = 24
     blueprints: list[Blueprint] = []
     p1, p2 = (0, 0)
     for blueprint_line in input_file.read_text().splitlines():

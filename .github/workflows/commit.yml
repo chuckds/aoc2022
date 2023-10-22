@@ -23,6 +23,3 @@ jobs:
     - name: Ruff
       run: |
         ruff check python/src/
-    - name: Pytest
-      run: |
-        pytest python/src

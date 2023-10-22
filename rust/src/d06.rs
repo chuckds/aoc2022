@@ -1,6 +1,6 @@
-use std::str;
-use std::collections::HashSet;
 use crate::utils::*;
+use std::collections::HashSet;
+use std::str;
 
 pub fn p1p2(input_file: &str) -> AoCSolver {
     let mut p1: Vec<i64> = Vec::new();

@@ -70,9 +70,11 @@ def per_day_main(day: str = "") -> None:
     to_check = []
     for function, input_file, expected_result, example in day_info:
         part_function = getattr(day_mod, function)
+        start = time.perf_counter()
         result = part_function(input_dir / input_file)
         name = "example" if example else "real"
-        print(f"{name} = {result}")
+        duration = time.perf_counter() - start
+        print(f"{name} = {result} (in {duration:.3f}s)")
         to_check.append((expected_result, result, name))
     for expected_result, result, name in to_check:
         assert expected_result == result, f"{name} result wrong"

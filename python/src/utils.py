@@ -77,7 +77,7 @@ def per_day_main(day: str = "") -> None:
         print(f"{name} = {result} (in {duration:.3f}s)")
         to_check.append((expected_result, result, name))
     for expected_result, result, name in to_check:
-        assert expected_result == result, f"{name} result wrong"
+        assert expected_result == result, f"{day}-{name} result wrong, expected: {expected_result} got {result}"
 
 
 def run_all() -> None:

@@ -1,3 +1,4 @@
+import argparse
 import json
 import inspect
 import importlib
@@ -26,7 +27,10 @@ def get_puzzle_info(examples: bool) -> list[tuple[str, str, str, str]]:
     with (repo_root / "answers.json").open() as f:
         test_answers = json.load(f)
     for day, function, input_file, expected_result in test_answers:
-        expected_result = tuple(expected_result)
+        try:
+            expected_result = tuple(expected_result)
+        except TypeError:  # Assume not iterable i.e. just one answer
+            expected_result = expected_result
         is_example = "example" in input_file
         if is_example and examples:
             day_parts.append(
@@ -64,11 +68,17 @@ def example_input(day: str = "") -> Path:
 
 
 def per_day_main(day: str = "") -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--example", action="store_true", help="Example only")
+    parser.add_argument("--real", action="store_true", help="Real only")
+    args = parser.parse_args()
     day = day if day else Path(inspect.stack()[1].filename).stem
     day_info = get_day_info(day)
     day_mod = importlib.__import__(day)
     to_check = []
     for function, input_file, expected_result, example in day_info:
+        if example and args.real or (not example and args.example):
+            continue
         part_function = getattr(day_mod, function)
         start = time.perf_counter()
         result = part_function(input_dir / input_file)
@@ -77,7 +87,9 @@ def per_day_main(day: str = "") -> None:
         print(f"{name} = {result} (in {duration:.3f}s)")
         to_check.append((expected_result, result, name))
     for expected_result, result, name in to_check:
-        assert expected_result == result, f"{day}-{name} result wrong, expected: {expected_result} got {result}"
+        assert (
+            expected_result == result
+        ), f"{day}-{name} result wrong, expected: {expected_result} got {result}"
 
 
 def run_all() -> None:

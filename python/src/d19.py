@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import functools
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Iterator
 from dataclasses import dataclass
 import math
 import sys
@@ -26,6 +26,7 @@ class ResCounts(NamedTuple):
 
     def worse_than(self, other: ResCounts) -> bool:
         return all(o_r == -1 or o_r >= s_r >= 0 for s_r, o_r in zip(self, other))
+
 
 def min_to_afford(cost: ResCounts, bank: ResCounts, robots: ResCounts) -> int:
     # Cope with bank of -1 representing "enough"
@@ -66,24 +67,24 @@ class FactoryState(NamedTuple):
     def better_than(self, other: FactoryState) -> bool:
         if self.can_build_a_geo_a_min():
             # Could do some maths here
-            return self.bank.geo > other.bank.geo and self.robot_counts.geo > other.robot_counts.geo
+            return self.bank.geo >= other.bank.geo and self.robot_counts.geo >= other.robot_counts.geo
         else:
             return self.bank.better_than(other.bank) and self.robot_counts.better_than(other.robot_counts)
 
     def worse_than(self, other: FactoryState) -> bool:
         if other.can_build_a_geo_a_min():
             # Could do some maths here
-            return self.bank.geo < other.bank.geo and self.robot_counts.geo < other.robot_counts.geo
+            return self.bank.geo <= other.bank.geo and self.robot_counts.geo <= other.robot_counts.geo
         else:
             return self.bank.worse_than(other.bank) and self.robot_counts.worse_than(other.robot_counts)
 
     def child_states(self, bp: Blueprint) -> list[FactoryState]:
         new_states = []
-        have_bought_nothing = False
-        for res_idx, robot_cost in bp.res_robot_costs.items():
+        buy_nothing = False
+        for res_idx, robot_cost in enumerate(bp.res_robot_costs):
             if self.bank[res_idx] < 0:
                 # We have enough robots of this type to afford any robot every
-                # minute no need to build any more (doesn't apply to geodes)
+                # minute no need to build any more
                 continue
 
             min_to_earn = min_to_afford(robot_cost, self.bank, self.robot_counts)
@@ -118,27 +119,33 @@ class FactoryState(NamedTuple):
                         self.time_left - min_to_earn - 1, new_bank, new_robot_counts
                     )
                 )
-            elif not have_bought_nothing:
-                have_bought_nothing = True
+            else:
                 # Not enough time to build so don't do anything
-                buy_nothing_bank = calc_new_bank(self.time_left, self.bank, self.robot_counts)
-                new_states.append(FactoryState(0, buy_nothing_bank, self.robot_counts))
+                buy_nothing = True
+        if buy_nothing:
+            new_states.append(
+                FactoryState(0, calc_new_bank(self.time_left, self.bank, self.robot_counts), self.robot_counts)
+            )
         return new_states
 
 
 @dataclass
 class Blueprint:
     num: int
-    res_robot_costs: dict[int, ResCounts]
+    res_robot_costs: list[ResCounts]
 
     @functools.cached_property
     def max_robot_res_cost(self) -> ResCounts:
         """Get the max cost of each resource type across all robot types."""
-        max_res = []
-        for idx in range(len(ResCounts._fields)):
-            max_res.append(
-                max(robot_cost[idx] for robot_cost in self.res_robot_costs.values())
-            )
+        # For a given resource X ignore the cost of robot X when trying to find
+        # the max cost of that resource across all robots since we only build
+        # robots so we can build other robots - not so that we can build more
+        # of the same robot. This doesn't apply to Geos!
+        # This appears to make no difference to p2 time
+        max_res = [
+            max(robot_cost[idx] if idx == 3 or idx != robot_idx else 0 for robot_idx, robot_cost in enumerate(self.res_robot_costs))
+            for idx in range(len(ResCounts._fields))
+        ]
         return ResCounts(*max_res)
 
     def max_geodes(self, time_available: int) -> int:
@@ -161,13 +168,7 @@ class Blueprint:
                     )
             if states_to_check:
                 del time_to_states[time]
-                print(
-                    f"{time} min left, {len(states_to_check):,} states checked ({trimmed=:,})"
-                )
         max_state = max(time_to_states[0], key=lambda state: state.bank.geo)
-        print(
-            f"bp: {self.num} {max_state.bank.geo=} states checked: {states_checked} {max_state} "
-        )
         return max_state.bank.geo
 
     @classmethod
@@ -177,16 +178,25 @@ class Blueprint:
         return cls(bp_num, get_bp_robot_costs(costs))
 
 
-def get_bp_robot_costs(costs: str) -> dict[int, ResCounts]:
-    robot_costs = {}
-    for robot_info_line in costs.split(".")[:-1]:
-        _, robot_name, _, _, cost_info = robot_info_line.split(maxsplit=4)
+def get_bp_robot_costs(costs: str) -> list[ResCounts]:
+    def robot_costs_from_text(costs: str) -> Iterator[tuple[str, str]]:
+        for robot_info_line in costs.split(".")[:-1]:
+            _, robot_name, _, _, cost_info = robot_info_line.split(maxsplit=4)
+            yield robot_name, cost_info
+
+    def robot_lost_from_str(cost_info: str) -> ResCounts:
         robot_cost = ResCounts()
         for cost_part in cost_info.split(" and "):
             num_str, res_str = cost_part.split()
             robot_cost = robot_cost._replace(**{res_str[:3]: int(num_str)})
-        robot_costs[ResCounts._fields.index(robot_name[:3])] = robot_cost
-    return robot_costs
+        return robot_cost
+
+    robot_costs = {
+        robot_name[:3]: robot_lost_from_str(cost_info)
+        for robot_name, cost_info in robot_costs_from_text(costs)
+    }
+    # Return a list of the robot costs in the same order as ResCounts
+    return [robot_costs[field] for field in ResCounts._fields]
 
 
 def p1(input_file: Path = utils.real_input()) -> int:
